@@ -15,6 +15,8 @@ const PUBLIC_PATHS = [
   "/third-party-disclosure",
   "/cookies",
   "/impressum",
+  "/robots.txt",
+  "/sitemap.xml",
 ];
 
 function isPublicPath(pathname: string) {

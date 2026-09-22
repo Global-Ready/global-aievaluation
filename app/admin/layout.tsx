@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Briefcase, ArrowLeft, BookOpen, ClipboardCheck, Quote, Gift } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+
+// Belt-and-suspenders alongside the /admin disallow in app/robots.ts —
+// these routes already redirect non-admins away server-side, but a bare
+// noindex costs nothing.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminLayout({
   children,

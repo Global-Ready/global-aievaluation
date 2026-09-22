@@ -314,9 +314,15 @@ export default function JobsView({ stats, jobs, onBack, backLabel = "Back to AI 
                   </div>
                 </div>
 
-                {/* EXPANDED PANEL INLINE */}
-                {isExpanded && (
-                  <div className="px-5 pb-5 pt-2 border-t border-slate-100 dark:border-slate-850 animate-fade-in bg-slate-50/50 dark:bg-slate-950/20">
+                {/* EXPANDED PANEL INLINE — always rendered (not conditionally
+                    mounted) so the full role description is present in the
+                    server-rendered HTML for every job, not just the one
+                    expanded by default; "hidden" only toggles visibility. */}
+                <div
+                  className={`px-5 pb-5 pt-2 border-t border-slate-100 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 ${
+                    isExpanded ? "animate-fade-in" : "hidden"
+                  }`}
+                >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-3">
                       
                       {/* Left Column: Description & Skills */}
@@ -393,8 +399,7 @@ export default function JobsView({ stats, jobs, onBack, backLabel = "Back to AI 
                       </div>
 
                     </div>
-                  </div>
-                )}
+                </div>
               </div>
             );
           })}

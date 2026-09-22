@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+
+// Login/signup/forgot-password/reset-password have no unique content worth
+// indexing, and reset-password can carry a sensitive token in the URL —
+// keep all four out of search results.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AuthLayout({
   children,

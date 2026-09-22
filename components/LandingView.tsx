@@ -63,6 +63,19 @@ export default function LandingView({ onEnterPlatform, onLogin, testimonials }: 
     }
   ];
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+
   return (
     <div id="landing-page-root" className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-all duration-300">
       
@@ -640,8 +653,12 @@ export default function LandingView({ onEnterPlatform, onLogin, testimonials }: 
       {/* 9. FREQUENTLY ASKED QUESTIONS (FAQ ACCORDION) */}
       <Reveal>
       <section id="faq" className="bg-slate-100/50 dark:bg-slate-900/30 py-20 border-t border-slate-200/50 dark:border-slate-900 px-6">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
         <div className="max-w-3xl mx-auto space-y-12">
-          
+
           <div className="text-center space-y-3">
             <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               Frequently Asked <span className="text-[#4F46E5] dark:text-indigo-400">Questions</span>
@@ -661,6 +678,7 @@ export default function LandingView({ onEnterPlatform, onLogin, testimonials }: 
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : i)}
+                    aria-expanded={isOpen}
                     className="w-full py-4.5 px-6 flex items-center justify-between gap-4 text-left cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-850/30 transition-colors"
                   >
                     <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200">
@@ -673,11 +691,16 @@ export default function LandingView({ onEnterPlatform, onLogin, testimonials }: 
                     )}
                   </button>
 
-                  {isOpen && (
-                    <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-850 animate-fade-in">
-                      {faq.answer}
-                    </div>
-                  )}
+                  {/* Always rendered (not conditionally mounted) so every
+                      answer is present in the server-rendered HTML for
+                      search engines; "hidden" only toggles visibility. */}
+                  <div
+                    className={`px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-850 ${
+                      isOpen ? "animate-fade-in" : "hidden"
+                    }`}
+                  >
+                    {faq.answer}
+                  </div>
                 </div>
               );
             })}
