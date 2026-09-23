@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Users, Star, ChevronLeft, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Users, Star, ChevronLeft, ArrowRight, X, Maximize2 } from "lucide-react";
 import type { Testimonial } from "@/types";
 import { renderFormattedText } from "./LessonContentRenderer";
 
@@ -13,6 +13,16 @@ export default function TestimonialsSection({
   id?: string;
 }) {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxOpen]);
 
   return (
     <section id={id} className="max-w-4xl mx-auto px-6 py-16 space-y-12">
@@ -46,13 +56,21 @@ export default function TestimonialsSection({
 
             <div className={`flex flex-col ${testimonials[activeTestimonial].proofImageUrl ? "md:flex-row md:items-stretch" : ""} gap-6`}>
               {testimonials[activeTestimonial].proofImageUrl && (
-                <div className="md:w-2/5 shrink-0 h-48 md:h-full rounded-2xl border border-slate-150 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setLightboxOpen(true)}
+                  aria-label="View full-size proof image"
+                  className="group relative md:w-2/5 shrink-0 max-h-96 md:max-h-none md:h-full rounded-2xl border border-slate-150 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 overflow-hidden cursor-zoom-in"
+                >
                   <img
                     src={testimonials[activeTestimonial].proofImageUrl}
                     alt={`Proof of work — ${testimonials[activeTestimonial].name}`}
-                    className="w-full h-full object-contain"
+                    className="w-full h-auto max-h-96 md:h-full md:max-h-none object-contain mx-auto"
                   />
-                </div>
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
+                    <Maximize2 className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" />
+                  </span>
+                </button>
               )}
 
               <div className={`space-y-6 ${testimonials[activeTestimonial].proofImageUrl ? "md:w-3/5" : "w-full"}`}>
@@ -132,6 +150,28 @@ export default function TestimonialsSection({
           <p className="text-center text-[10px] text-slate-400 dark:text-slate-550">
             Testimonials reflect individual experiences. Results vary and are not guaranteed.
           </p>
+
+          {lightboxOpen && testimonials[activeTestimonial].proofImageUrl && (
+            <div
+              onClick={() => setLightboxOpen(false)}
+              className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 sm:p-8 cursor-zoom-out animate-fade-in"
+            >
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(false)}
+                aria-label="Close"
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <img
+                src={testimonials[activeTestimonial].proofImageUrl}
+                alt={`Proof of work — ${testimonials[activeTestimonial].name}`}
+                onClick={(e) => e.stopPropagation()}
+                className="max-w-full max-h-full object-contain rounded-lg cursor-default"
+              />
+            </div>
+          )}
         </>
       )}
     </section>
