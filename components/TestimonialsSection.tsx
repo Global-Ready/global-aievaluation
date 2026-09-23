@@ -46,11 +46,11 @@ export default function TestimonialsSection({
 
             <div className={`flex flex-col ${testimonials[activeTestimonial].proofImageUrl ? "md:flex-row md:items-stretch" : ""} gap-6`}>
               {testimonials[activeTestimonial].proofImageUrl && (
-                <div className="md:w-2/5 shrink-0">
+                <div className="md:w-2/5 shrink-0 h-48 md:h-full rounded-2xl border border-slate-150 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 overflow-hidden">
                   <img
                     src={testimonials[activeTestimonial].proofImageUrl}
                     alt={`Proof of work — ${testimonials[activeTestimonial].name}`}
-                    className="w-full h-48 md:h-full object-cover object-top rounded-2xl border border-slate-150 dark:border-slate-800"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               )}
