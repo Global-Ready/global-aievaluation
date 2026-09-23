@@ -27,11 +27,11 @@ function ContentBlock({
         </p>
       )}
       {media && (
-        <div className="rounded-xl overflow-hidden border border-slate-150 dark:border-slate-800 max-w-md">
+        <div className="rounded-xl overflow-hidden border border-slate-150 dark:border-slate-800">
           {media.type === "image" ? (
-            <img src={media.url} alt="" className="w-full object-contain max-h-72" />
+            <img src={media.url} alt="" className="w-full object-contain max-h-[70vh]" />
           ) : media.type === "video" ? (
-            <video src={media.url} controls className="w-full max-h-72 bg-black" />
+            <video src={media.url} controls className="w-full max-h-[70vh] bg-black" />
           ) : (
             <audio src={media.url} controls className="w-full" />
           )}
