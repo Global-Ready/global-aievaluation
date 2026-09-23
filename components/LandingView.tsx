@@ -79,11 +79,6 @@ export default function LandingView({ onEnterPlatform, onLogin, testimonials }: 
   return (
     <div id="landing-page-root" className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-all duration-300">
 
-      {/* TEMPORARY DEPLOY-VERIFICATION MARKER — remove once confirmed live */}
-      <div className="bg-fuchsia-600 text-white text-xs py-2 px-4 text-center font-black tracking-wide">
-        🚧 DEPLOY TEST — if you can see this, the latest push is live (2026-09-23)
-      </div>
-
       {/* 1. TOP UTILITY ANNOUNCEMENT BAR */}
       <div className="bg-[#4F46E5] text-white text-[11px] sm:text-xs py-2 px-4 text-center font-bold tracking-wide flex items-center justify-center gap-1.5 shadow-sm">
         <Sparkles className="w-3.5 h-3.5 animate-pulse" />
