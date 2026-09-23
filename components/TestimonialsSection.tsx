@@ -50,7 +50,7 @@ export default function TestimonialsSection({
                   <img
                     src={testimonials[activeTestimonial].proofImageUrl}
                     alt={`Proof of work — ${testimonials[activeTestimonial].name}`}
-                    className="w-full h-48 md:h-full object-cover rounded-2xl border border-slate-150 dark:border-slate-800"
+                    className="w-full h-48 md:h-full object-cover object-top rounded-2xl border border-slate-150 dark:border-slate-800"
                   />
                 </div>
               )}
