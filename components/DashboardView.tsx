@@ -1,8 +1,8 @@
 import React from "react";
 import {
-  BookOpen, Play, Lock, Gauge
+  BookOpen, Play, Lock, Gauge, Megaphone
 } from "lucide-react";
-import { UserStats, Rank, Module } from "../types";
+import { UserStats, Rank, Module, SiteAnnouncement } from "../types";
 
 interface DashboardViewProps {
   stats: UserStats;
@@ -15,6 +15,7 @@ interface DashboardViewProps {
   activeModuleId: string;
   setActiveModuleId: (id: string) => void;
   setActivePartId?: (partId: string | null) => void;
+  announcement?: SiteAnnouncement | null;
 }
 
 export default function DashboardView({
@@ -27,7 +28,8 @@ export default function DashboardView({
   startLesson,
   activeModuleId,
   setActiveModuleId,
-  setActivePartId
+  setActivePartId,
+  announcement,
 }: DashboardViewProps) {
 
   // Calculate completed metrics for overall curriculum
@@ -114,7 +116,24 @@ export default function DashboardView({
 
   return (
     <div id="dashboard-view" className="space-y-6 animate-fade-in pl-1">
-      
+
+      {/* Admin-controlled cohort/announcement banner — only renders when
+          an admin has one turned on in /admin/announcement. */}
+      {announcement && (
+        <div className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs sm:text-sm py-3 px-4 sm:px-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 shadow-sm font-bold text-center">
+          <Megaphone className="w-4 h-4 shrink-0" />
+          <span>{announcement.message}</span>
+          {announcement.linkUrl && (
+            <a
+              href={announcement.linkUrl}
+              className="underline underline-offset-2 hover:no-underline font-black shrink-0"
+            >
+              {announcement.linkLabel || "Learn More"} &rarr;
+            </a>
+          )}
+        </div>
+      )}
+
       {/* 1. Minimalist Welcoming Greeting Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
         <div className="space-y-1">

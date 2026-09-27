@@ -3,6 +3,7 @@ import type {
   Module,
   UserStats,
   Testimonial,
+  SiteAnnouncement,
 } from "@/types";
 import type { JobOpportunity } from "@/data/jobs";
 import { isModuleAccessible, isSimulationPracticeAccessible, type MembershipTier } from "@/lib/access";
@@ -130,6 +131,32 @@ export async function getTestimonials(): Promise<Testimonial[]> {
     proofImageUrl: t.proof_image_url ?? undefined,
     rating: t.rating ?? undefined,
   }));
+}
+
+// Singleton banner (e.g. "Next cohort starts Oct 1") shown at the top of
+// the landing page and the dashboard. Returns null when there's nothing to
+// show — no active announcement, empty message, or the table/migration
+// isn't there yet — same "never 500 the page over decorative content"
+// posture as getTestimonials.
+export async function getSiteAnnouncement(): Promise<SiteAnnouncement | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("site_announcement")
+    .select("message, link_url, link_label, is_active")
+    .eq("id", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error(`getSiteAnnouncement: ${error.message}`);
+    return null;
+  }
+  if (!data || !data.is_active || !data.message.trim()) return null;
+
+  return {
+    message: data.message,
+    linkUrl: data.link_url ?? undefined,
+    linkLabel: data.link_label ?? undefined,
+  };
 }
 
 export async function getJobs(): Promise<JobOpportunity[]> {

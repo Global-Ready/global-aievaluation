@@ -366,3 +366,24 @@ export async function getAdminTestimonial(
   if (error) throw new Error(`getAdminTestimonial: ${error.message}`);
   return data;
 }
+
+export interface AdminSiteAnnouncementRow {
+  message: string;
+  link_url: string | null;
+  link_label: string | null;
+  is_active: boolean;
+}
+
+// Singleton row (see supabase/migrations/0030_site_announcement.sql) —
+// always exactly one row, seeded by the migration itself.
+export async function getAdminSiteAnnouncement(): Promise<AdminSiteAnnouncementRow> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("site_announcement")
+    .select("message, link_url, link_label, is_active")
+    .eq("id", true)
+    .single();
+
+  if (error) throw new Error(`getAdminSiteAnnouncement: ${error.message}`);
+  return data;
+}

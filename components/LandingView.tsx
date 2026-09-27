@@ -6,9 +6,9 @@ import {
   ArrowRight, ShieldCheck, DollarSign, Clock, Globe, Lock,
   Users, CheckCircle2, ChevronDown, ChevronUp,
   Sparkles, Briefcase, Award, GraduationCap, Play, HelpCircle, Zap,
-  BookOpen, Target, Rocket
+  BookOpen, Target, Rocket, Megaphone
 } from "lucide-react";
-import type { Testimonial } from "@/types";
+import type { Testimonial, SiteAnnouncement } from "@/types";
 import Reveal from "./Reveal";
 import TestimonialsSection from "./TestimonialsSection";
 import CookieConsentBanner from "./CookieConsentBanner";
@@ -18,11 +18,12 @@ interface LandingViewProps {
   onEnterPlatform: () => void;
   onLogin: () => void;
   testimonials: Testimonial[];
+  announcement?: SiteAnnouncement | null;
 }
 
 const PRACTICE_PLATFORMS = ["Outlier", "Scale AI", "Alignerr", "Mercor", "Micro1"];
 
-export default function LandingView({ onEnterPlatform, onLogin, testimonials }: LandingViewProps) {
+export default function LandingView({ onEnterPlatform, onLogin, testimonials, announcement }: LandingViewProps) {
   // State for FAQ Accordions
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -78,6 +79,23 @@ export default function LandingView({ onEnterPlatform, onLogin, testimonials }: 
 
   return (
     <div id="landing-page-root" className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-all duration-300">
+
+      {/* Admin-controlled cohort/announcement banner — only renders when
+          an admin has one turned on in /admin/announcement. */}
+      {announcement && (
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[11px] sm:text-xs py-2.5 px-4 text-center font-bold tracking-wide flex flex-wrap items-center justify-center gap-x-2 gap-y-1 shadow-sm">
+          <Megaphone className="w-3.5 h-3.5 shrink-0" />
+          <span>{announcement.message}</span>
+          {announcement.linkUrl && (
+            <a
+              href={announcement.linkUrl}
+              className="underline underline-offset-2 hover:no-underline font-black shrink-0"
+            >
+              {announcement.linkLabel || "Learn More"} &rarr;
+            </a>
+          )}
+        </div>
+      )}
 
       {/* 1. TOP UTILITY ANNOUNCEMENT BAR */}
       <div className="bg-[#4F46E5] text-white text-[11px] sm:text-xs py-2 px-4 text-center font-bold tracking-wide flex items-center justify-center gap-1.5 shadow-sm">

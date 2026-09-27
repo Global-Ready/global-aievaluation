@@ -1,7 +1,7 @@
 import App from "@/App";
 import LandingGate from "@/components/LandingGate";
 import { createClient } from "@/lib/supabase/server";
-import { getModuleCurriculum, getJobs, getUserStats, getTestimonials } from "@/lib/content";
+import { getModuleCurriculum, getJobs, getUserStats, getTestimonials, getSiteAnnouncement } from "@/lib/content";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -10,8 +10,11 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    const testimonials = await getTestimonials();
-    return <LandingGate testimonials={testimonials} />;
+    const [testimonials, announcement] = await Promise.all([
+      getTestimonials(),
+      getSiteAnnouncement(),
+    ]);
+    return <LandingGate testimonials={testimonials} announcement={announcement} />;
   }
 
   const { data: profile } = await supabase
@@ -20,12 +23,13 @@ export default async function Home() {
     .eq("id", user.id)
     .maybeSingle();
 
-  const [moduleCurriculum, jobs, initialStats, testimonials] =
+  const [moduleCurriculum, jobs, initialStats, testimonials, announcement] =
     await Promise.all([
       getModuleCurriculum(profile?.membership_tier ?? "free"),
       getJobs(),
       getUserStats(user.id, user.email!),
       getTestimonials(),
+      getSiteAnnouncement(),
     ]);
 
   return (
@@ -36,6 +40,7 @@ export default async function Home() {
       initialStats={initialStats}
       isAdmin={profile?.is_admin ?? false}
       testimonials={testimonials}
+      announcement={announcement}
     />
   );
 }

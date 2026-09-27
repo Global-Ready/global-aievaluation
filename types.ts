@@ -160,3 +160,9 @@ export interface Testimonial {
   proofImageUrl?: string;
   rating?: number;
 }
+
+export interface SiteAnnouncement {
+  message: string;
+  linkUrl?: string;
+  linkLabel?: string;
+}
