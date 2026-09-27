@@ -808,7 +808,7 @@ export default function App({
               </span>
             </button>
 
-            {stats.membershipTier === "career_accelerator" && (
+            {!isAdmin && stats.membershipTier === "career_accelerator" && (
               <button
                 id="tab-btn-affiliate"
                 onClick={() => {
@@ -1692,6 +1692,7 @@ export default function App({
                 <AffiliateView
                   onBack={() => setActiveTab("dashboard")}
                   membershipTier={stats.membershipTier}
+                  isAdmin={isAdmin}
                 />
               )}
 

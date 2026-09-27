@@ -32,11 +32,13 @@ const PROMOTE_ITEMS = [
 export default function AffiliateView({
   onBack,
   membershipTier,
+  isAdmin,
 }: {
   onBack: () => void;
   membershipTier?: string;
+  isAdmin?: boolean;
 }) {
-  const isEligible = membershipTier === "career_accelerator";
+  const isEligible = !isAdmin && membershipTier === "career_accelerator";
   const [affiliateStatus, setAffiliateStatus] = useState<AffiliateStatus | null>(null);
   const [referralSummary, setReferralSummary] = useState<AffiliateReferralSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -162,9 +164,13 @@ export default function AffiliateView({
               <Lock className="w-7 h-7" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-black text-slate-900 dark:text-white">Career Accelerator members only</h3>
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
+                {isAdmin ? "Not available to admin accounts" : "Career Accelerator members only"}
+              </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                The Affiliate Program is currently available to Career Accelerator members. Upgrade your plan to request access.
+                {isAdmin
+                  ? "Admin accounts can't join the Affiliate Program."
+                  : "The Affiliate Program is currently available to Career Accelerator members. Upgrade your plan to request access."}
               </p>
             </div>
           </div>

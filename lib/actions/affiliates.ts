@@ -70,9 +70,12 @@ export async function becomeAffiliate(
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("membership_tier")
+    .select("membership_tier, is_admin")
     .eq("id", user.id)
     .maybeSingle();
+  if (profile?.is_admin) {
+    return { error: "Admin accounts can't join the Affiliate Program." };
+  }
   if (profile?.membership_tier !== "career_accelerator") {
     return { error: "The Affiliate Program is currently available to Career Accelerator members only." };
   }
