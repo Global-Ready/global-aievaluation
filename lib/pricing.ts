@@ -59,7 +59,7 @@ export const TIERS: Record<TierId, TierMeta> = {
     id: "career_accelerator",
     label: "Accelerator",
     displayName: "2 Weeks AI Training Mentorship",
-    priceDisplay: "€99.99 one-time",
+    priceDisplay: "€179 one-time",
     billing: "one_time",
     features: [
       "2-week intensive training program",

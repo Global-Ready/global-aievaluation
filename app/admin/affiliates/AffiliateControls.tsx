@@ -56,6 +56,32 @@ export function RateForm({
   );
 }
 
+export function PendingRequestActions({ userId }: { userId: string }) {
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <div className="flex items-center justify-end gap-3">
+      {isPending && <Loader2 className="w-3 h-3 animate-spin text-slate-400" />}
+      <button
+        type="button"
+        onClick={() => startTransition(async () => { await setAffiliateStatus(userId, "active"); })}
+        disabled={isPending}
+        className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline disabled:opacity-60 cursor-pointer"
+      >
+        Approve
+      </button>
+      <button
+        type="button"
+        onClick={() => startTransition(async () => { await setAffiliateStatus(userId, "disabled"); })}
+        disabled={isPending}
+        className="text-rose-600 dark:text-rose-450 font-bold hover:underline disabled:opacity-60 cursor-pointer"
+      >
+        Reject
+      </button>
+    </div>
+  );
+}
+
 export function StatusToggleButton({
   userId,
   status,

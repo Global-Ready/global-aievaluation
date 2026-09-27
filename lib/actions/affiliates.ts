@@ -8,7 +8,7 @@ export type AffiliateReferralStatus = "pending" | "approved" | "paid" | "reverse
 export interface AffiliateStatus {
   code: string;
   commissionRate: number;
-  status: "active" | "disabled";
+  status: "pending" | "active" | "disabled";
 }
 
 export interface AffiliateReferral {
@@ -48,9 +48,13 @@ export async function getMyAffiliateStatus(): Promise<AffiliateStatus | null> {
   return { code: data.code, commissionRate: data.commission_rate, status: data.status };
 }
 
+// The program isn't self-serve — only Career Accelerator members can
+// request to join, and a request lands as 'pending' until an admin
+// approves it (see app/admin/affiliates). This check is the real gate;
+// hiding the nav entry for ineligible users is just UI, not enforcement.
 export async function becomeAffiliate(
   termsAccepted: boolean,
-): Promise<{ error?: string; code?: string }> {
+): Promise<{ error?: string; code?: string; status?: AffiliateStatus["status"] }> {
   if (!termsAccepted) {
     return { error: "You must accept the Affiliate Program Terms to join." };
   }
@@ -62,7 +66,16 @@ export async function becomeAffiliate(
   if (!user) return { error: "Not authenticated" };
 
   const existing = await getMyAffiliateStatus();
-  if (existing) return { code: existing.code };
+  if (existing) return { code: existing.code, status: existing.status };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("membership_tier")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile?.membership_tier !== "career_accelerator") {
+    return { error: "The Affiliate Program is currently available to Career Accelerator members only." };
+  }
 
   const acceptedAt = new Date().toISOString();
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -70,10 +83,11 @@ export async function becomeAffiliate(
     const { error } = await supabase.from("affiliates").insert({
       user_id: user.id,
       code,
+      status: "pending",
       terms_accepted_at: acceptedAt,
       terms_version: AFFILIATE_TERMS_VERSION,
     });
-    if (!error) return { code };
+    if (!error) return { code, status: "pending" };
     if (error.code !== "23505") return { error: error.message };
     // Unique violation on the generated code — regenerate and retry.
   }

@@ -114,11 +114,6 @@ function mapJobFieldToInterviewDomainId(field: string): string {
 
 const MODULE_CARD_DESCRIPTION_WORD_LIMIT = 35;
 
-// Temporary: hide the affiliate program entry point from the sidebar until
-// it's ready to launch. The /affiliate-terms page and the affiliate tab
-// itself are untouched — flip this back to true to relaunch it.
-const SHOW_AFFILIATE_NAV = false;
-
 // Truncates on a word boundary so cards in the same grid row settle at a
 // consistent height instead of stretching to whatever the longest module
 // description happens to be.
@@ -811,7 +806,7 @@ export default function App({
               </span>
             </button>
 
-            {SHOW_AFFILIATE_NAV && (
+            {stats.membershipTier === "career_accelerator" && (
               <button
                 id="tab-btn-affiliate"
                 onClick={() => {
@@ -1691,7 +1686,10 @@ export default function App({
               )}
 
               {activeTab === "affiliate" && (
-                <AffiliateView onBack={() => setActiveTab("dashboard")} />
+                <AffiliateView
+                  onBack={() => setActiveTab("dashboard")}
+                  membershipTier={stats.membershipTier}
+                />
               )}
 
               {activeTab === "jobs" && (

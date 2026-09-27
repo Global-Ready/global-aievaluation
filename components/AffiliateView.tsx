@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft, Gift, Link2, Share2, TrendingUp, Wallet, Check, Copy,
   ShieldAlert, RefreshCw, CheckCircle2, Megaphone, Sparkles, FileText, CalendarClock,
+  Clock, Lock,
 } from "lucide-react";
 import {
   becomeAffiliate,
@@ -28,7 +29,14 @@ const PROMOTE_ITEMS = [
   "Discover AI training opportunities",
 ];
 
-export default function AffiliateView({ onBack }: { onBack: () => void }) {
+export default function AffiliateView({
+  onBack,
+  membershipTier,
+}: {
+  onBack: () => void;
+  membershipTier?: string;
+}) {
+  const isEligible = membershipTier === "career_accelerator";
   const [affiliateStatus, setAffiliateStatus] = useState<AffiliateStatus | null>(null);
   const [referralSummary, setReferralSummary] = useState<AffiliateReferralSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +156,18 @@ export default function AffiliateView({ onBack }: { onBack: () => void }) {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
         {isLoading ? (
           <p className="text-xs text-slate-400">Loading...</p>
+        ) : !affiliateStatus && !isEligible ? (
+          <div className="text-center space-y-4 py-4 max-w-md mx-auto">
+            <div className="inline-flex p-4 bg-slate-100 dark:bg-slate-850 rounded-full text-slate-400 dark:text-slate-500">
+              <Lock className="w-7 h-7" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-black text-slate-900 dark:text-white">Career Accelerator members only</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                The Affiliate Program is currently available to Career Accelerator members. Upgrade your plan to request access.
+              </p>
+            </div>
+          </div>
         ) : !affiliateStatus ? (
           <div className="text-center space-y-4 py-4 max-w-md mx-auto">
             <div className="inline-flex p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-full text-indigo-600 dark:text-indigo-400">
@@ -156,7 +176,7 @@ export default function AffiliateView({ onBack }: { onBack: () => void }) {
             <div className="space-y-1">
               <h3 className="text-base font-black text-slate-900 dark:text-white">Ready to start earning?</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Get your own referral link and earn {rateLabel} of every qualifying sale you bring in — no application needed.
+                Request to join the Affiliate Program and earn {rateLabel} of every qualifying sale you bring in — an admin reviews each request.
               </p>
             </div>
 
@@ -188,8 +208,20 @@ export default function AffiliateView({ onBack }: { onBack: () => void }) {
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
             >
               {isBecomingAffiliate && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-              Become an Affiliate
+              Request to Join
             </button>
+          </div>
+        ) : affiliateStatus.status === "pending" ? (
+          <div className="text-center space-y-3 py-4 max-w-md mx-auto">
+            <div className="inline-flex p-4 bg-amber-50 dark:bg-amber-950/30 rounded-full text-amber-600 dark:text-amber-400">
+              <Clock className="w-7 h-7" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-black text-slate-900 dark:text-white">Request submitted</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Your request to join the Affiliate Program is awaiting review. We&apos;ll unlock your referral link once it&apos;s approved.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-5">
@@ -302,7 +334,7 @@ export default function AffiliateView({ onBack }: { onBack: () => void }) {
         </span>
       </Link>
 
-      {affiliateStatus && (
+      {affiliateStatus && affiliateStatus.status !== "pending" && (
         <div className="bg-indigo-600 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
             <p className="text-sm font-black text-white">Ready to start earning?</p>

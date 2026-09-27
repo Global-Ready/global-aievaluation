@@ -255,7 +255,7 @@ export interface AdminAffiliateRow {
   display_name: string | null;
   code: string;
   commission_rate: number;
-  status: "active" | "disabled";
+  status: "pending" | "active" | "disabled";
   created_at: string;
   referral_count: number;
   pending_commission_cents: number;
@@ -310,7 +310,7 @@ export interface AdminAffiliateDetail {
   display_name: string | null;
   code: string;
   commission_rate: number;
-  status: "active" | "disabled";
+  status: "pending" | "active" | "disabled";
 }
 
 export async function getAdminAffiliate(userId: string): Promise<AdminAffiliateDetail | null> {
