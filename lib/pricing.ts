@@ -10,7 +10,10 @@ export interface TierMeta {
   displayName: string; // marketing name, e.g. "Independent Learner"
   priceDisplay: string; // e.g. "€20 one-time"
   billing: "free" | "one_time" | "subscription";
+  description?: string;
+  featuresIntro?: string;
   features: string[];
+  callToAction?: string;
 }
 
 export const TIERS: Record<TierId, TierMeta> = {
@@ -58,9 +61,13 @@ export const TIERS: Record<TierId, TierMeta> = {
   career_accelerator: {
     id: "career_accelerator",
     label: "Accelerator",
-    displayName: "2 Weeks AI Training Mentorship",
+    displayName: "Become Job-Ready for AI Training Opportunities",
     priceDisplay: "€149 one-time",
     billing: "one_time",
+    description:
+      "Join our two-week practical programme designed to help you prepare for AI evaluation and data annotation opportunities.",
+    featuresIntro: "For a one-time payment of €149, you get:",
+    callToAction: "Join the next cohort and start preparing for AI training opportunities.",
     features: [
       "Four live training and support sessions",
       "Guidance to register on suitable AI training platforms",

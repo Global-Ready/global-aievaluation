@@ -354,6 +354,11 @@ export default function MembershipView({ stats, checkoutResult, onDismissCheckou
                   <h3 className="text-lg font-black text-slate-900 dark:text-white mt-1">
                     {meta.displayName}
                   </h3>
+                  {meta.description && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                      {meta.description}
+                    </p>
+                  )}
                 </div>
 
                 <div className="py-1">
@@ -400,6 +405,9 @@ export default function MembershipView({ stats, checkoutResult, onDismissCheckou
                 )}
 
                 <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+                  {meta.featuresIntro && (
+                    <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{meta.featuresIntro}</p>
+                  )}
                   <ul className="space-y-2.5">
                     {meta.features.map((feat, i) => (
                       <li key={i} className="flex items-start gap-2 text-[11px] text-slate-600 dark:text-slate-350 leading-relaxed">
@@ -408,6 +416,9 @@ export default function MembershipView({ stats, checkoutResult, onDismissCheckou
                       </li>
                     ))}
                   </ul>
+                  {meta.callToAction && (
+                    <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300 leading-relaxed">{meta.callToAction}</p>
+                  )}
                 </div>
               </div>
             </div>
