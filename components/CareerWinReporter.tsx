@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { Trophy, Loader2, CheckCircle2, ShieldAlert } from "lucide-react";
 import { reportCareerWin } from "../lib/actions/career-wins";
+import { createClient } from "../lib/supabase/client";
+
+const MAX_SCREENSHOT_BYTES = 10 * 1024 * 1024;
 
 const inputClass =
   "w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500";
@@ -11,6 +14,7 @@ export default function CareerWinReporter() {
   const [kind, setKind] = useState<"interview" | "project">("interview");
   const [company, setCompany] = useState("");
   const [note, setNote] = useState("");
+  const [screenshot, setScreenshot] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
@@ -19,16 +23,46 @@ export default function CareerWinReporter() {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
-    const result = await reportCareerWin({ kind, company, note });
-    setIsSubmitting(false);
-    if (result.error) {
-      setError(result.error);
-      return;
+    try {
+      let screenshotPath: string | undefined;
+      if (screenshot) {
+        if (screenshot.size > MAX_SCREENSHOT_BYTES) {
+          setError("Screenshot is too large (max 10MB).");
+          return;
+        }
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          setError("Please sign in again.");
+          return;
+        }
+        const safeName = screenshot.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+        const path = `${user.id}/${Date.now()}-${safeName}`;
+        const { error: uploadError } = await supabase.storage
+          .from("career-win-proofs")
+          .upload(path, screenshot, { contentType: screenshot.type || undefined });
+        if (uploadError) {
+          setError(`Screenshot upload failed: ${uploadError.message}`);
+          return;
+        }
+        screenshotPath = path;
+      }
+
+      const result = await reportCareerWin({ kind, company, note, screenshotPath });
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      setDone(true);
+      setCompany("");
+      setNote("");
+      setScreenshot(null);
+      setTimeout(() => setDone(false), 3000);
+    } finally {
+      setIsSubmitting(false);
     }
-    setDone(true);
-    setCompany("");
-    setNote("");
-    setTimeout(() => setDone(false), 3000);
   };
 
   return (
@@ -66,6 +100,16 @@ export default function CareerWinReporter() {
           onChange={(e) => setNote(e.target.value)}
           placeholder="Anything to add (optional)"
         />
+        <label className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer">
+          <span className="font-bold text-indigo-600 dark:text-indigo-400">Attach a screenshot</span>
+          <span className="truncate">{screenshot ? screenshot.name : "(offer letter, invite email, etc. — optional)"}</span>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => setScreenshot(e.target.files?.[0] ?? null)}
+          />
+        </label>
 
         {error && (
           <p className="text-[11px] text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">

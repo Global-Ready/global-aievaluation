@@ -6,6 +6,7 @@ export async function reportCareerWin(input: {
   kind: "interview" | "project";
   company?: string;
   note?: string;
+  screenshotPath?: string;
 }): Promise<{ error?: string }> {
   if (input.kind !== "interview" && input.kind !== "project") {
     return { error: "Choose interview or project." };
@@ -17,11 +18,16 @@ export async function reportCareerWin(input: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  if (input.screenshotPath && !input.screenshotPath.startsWith(`${user.id}/`)) {
+    return { error: "Invalid screenshot path." };
+  }
+
   const { error } = await supabase.from("career_wins").insert({
     user_id: user.id,
     kind: input.kind,
     company: input.company?.trim().slice(0, 120) || null,
     note: input.note?.trim().slice(0, 500) || null,
+    screenshot_path: input.screenshotPath || null,
   });
   if (error) return { error: error.message };
   return {};
