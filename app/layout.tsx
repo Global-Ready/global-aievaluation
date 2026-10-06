@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import PresenceBeacon from "@/components/PresenceBeacon";
 
 // Self-hosted via next/font instead of a <link> to Google Fonts: no
 // external request/preconnect at render time (one less blocking origin),
@@ -83,7 +84,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <PresenceBeacon />
+      </body>
     </html>
   );
 }

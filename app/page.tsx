@@ -3,25 +3,34 @@ import LandingGate from "@/components/LandingGate";
 import { createClient } from "@/lib/supabase/server";
 import { getModuleCurriculum, getJobs, getUserStats, getTestimonials, getSiteAnnouncement } from "@/lib/content";
 import { createServiceClient } from "@/lib/supabase/service";
+import { headers } from "next/headers";
+import { classifyDevice, classifySource } from "@/lib/analytics";
 
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string }>;
+  searchParams: Promise<{ ref?: string; utm_source?: string }>;
 }) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    const { ref } = await searchParams;
-    const service = createServiceClient();
-    await service.from("analytics_events").insert([
-      { event: "landing_visit", meta: {} },
-      ...(ref ? [{ event: "referral_link_click", meta: { code: ref } }] : []),
-    ]);
+  const { ref, utm_source } = await searchParams;
+  const requestHeaders = await headers();
+  const device = classifyDevice(requestHeaders.get("user-agent"));
+  const source = classifySource(utm_source, requestHeaders.get("referer"));
+  const service = createServiceClient();
+  await service.from("analytics_events").insert([
+    {
+      event: user ? "app_visit" : "landing_visit",
+      user_id: user?.id ?? null,
+      meta: { source, device },
+    },
+    ...(ref ? [{ event: "referral_link_click", meta: { code: ref, source, device } }] : []),
+  ]);
 
+  if (!user) {
     const [testimonials, announcement] = await Promise.all([
       getTestimonials(),
       getSiteAnnouncement(),

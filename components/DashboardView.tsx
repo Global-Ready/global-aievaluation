@@ -3,6 +3,7 @@ import {
   BookOpen, Play, Lock, Gauge, Megaphone
 } from "lucide-react";
 import { UserStats, Rank, Module, SiteAnnouncement } from "../types";
+import CareerWinReporter from "./CareerWinReporter";
 
 interface DashboardViewProps {
   stats: UserStats;
@@ -264,6 +265,8 @@ export default function DashboardView({
           </p>
         </div>
       </div>
+
+      <CareerWinReporter />
 
       {/* 4. Modules Overview Section */}
       <div className="pt-2">
