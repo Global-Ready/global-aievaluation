@@ -2,14 +2,26 @@ import App from "@/App";
 import LandingGate from "@/components/LandingGate";
 import { createClient } from "@/lib/supabase/server";
 import { getModuleCurriculum, getJobs, getUserStats, getTestimonials, getSiteAnnouncement } from "@/lib/content";
+import { createServiceClient } from "@/lib/supabase/service";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
+    const { ref } = await searchParams;
+    const service = createServiceClient();
+    await service.from("analytics_events").insert([
+      { event: "landing_visit", meta: {} },
+      ...(ref ? [{ event: "referral_link_click", meta: { code: ref } }] : []),
+    ]);
+
     const [testimonials, announcement] = await Promise.all([
       getTestimonials(),
       getSiteAnnouncement(),

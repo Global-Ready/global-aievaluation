@@ -192,6 +192,9 @@ export async function createOneTimeCheckout(
     });
 
     if (!session.url) return { error: "Stripe did not return a checkout URL" };
+    await createServiceClient()
+      .from("analytics_events")
+      .insert({ event: "checkout_started", user_id: user.id, meta: { product: resolvedProduct } });
     redirect(session.url);
   } catch (err) {
     if (isRedirectError(err)) throw err;
