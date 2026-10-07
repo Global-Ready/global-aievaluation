@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { Lesson, UserStats, MiniCaseStudy } from "../types";
 import { renderLessonParagraph, renderFormattedText } from "./LessonContentRenderer";
+import InlineReviewBox from "./InlineReviewBox";
 
 // Collapses single line breaks (e.g. pasted from a chat UI that puts each
 // sentence on its own line) into spaces so the text wraps naturally to the
@@ -480,6 +481,8 @@ export default function LessonView({ lesson, stats, onBack, onComplete }: Lesson
                   ))}
                 </div>
               </div>
+
+              {hasCaseStudies && <InlineReviewBox contextType="case_study" contextLabel={lesson.title} />}
 
               <div className="pt-2 flex justify-between">
                 {hasCaseStudies ? (

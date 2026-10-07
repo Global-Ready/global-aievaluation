@@ -7,6 +7,7 @@ import {
 import type { PracticeTask, PracticeTaskSubmission, UserStats } from "@/types";
 import { renderFormattedText } from "./LessonContentRenderer";
 import type { PracticeDomainId } from "@/lib/practice-domains";
+import InlineReviewBox from "./InlineReviewBox";
 
 function ContentBlock({
   label,
@@ -263,7 +264,6 @@ export default function PracticeTaskRunner({
   filter,
   isUnlocked,
   onAdvanceLevel,
-  onLevelComplete,
 }: {
   tasks: PracticeTask[];
   existingSubmissions: Record<string, PracticeTaskSubmission>;
@@ -278,10 +278,6 @@ export default function PracticeTaskRunner({
   // Present only when a next level exists (i.e. filter isn't "expert") —
   // advances practiceLevel and jumps straight into it.
   onAdvanceLevel?: () => void;
-  // Fires once when every task in this level has just been completed —
-  // the review prompt hooks in here regardless of whether there's a next
-  // level to advance to (expert has no onAdvanceLevel).
-  onLevelComplete?: () => void;
 }) {
   const filtered = tasks.filter((t) => t.domain === domain && t.difficulty === filter);
 
@@ -297,10 +293,6 @@ export default function PracticeTaskRunner({
   const isCurrentSubmitted = currentTask ? !!existingSubmissions[currentTask.id] : false;
   const isLastTask = currentIndex === filtered.length - 1;
 
-  useEffect(() => {
-    if (filtered.length > 0 && !currentTask) onLevelComplete?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTask, filtered.length]);
 
   const LEVEL_COPY = {
     beginner: {
@@ -406,6 +398,13 @@ export default function PracticeTaskRunner({
               You&apos;ve completed every level in {domainLabel}.
             </p>
           )}
+
+          <div className="text-left max-w-md mx-auto">
+            <InlineReviewBox
+              contextType="practice_level"
+              contextLabel={`${domainLabel} — ${LEVEL_COPY[filter].title}`}
+            />
+          </div>
         </div>
       ) : (
         <div className="space-y-5">
