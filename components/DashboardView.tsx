@@ -230,7 +230,8 @@ export default function DashboardView({
 
       </div>
 
-      {/* 3. Resume Learning Feature Card */}
+      {/* 3. Resume Learning + Report a Win, side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
       <div className="bg-[#F2F5FF] dark:bg-slate-900/60 border border-[#DCE4FF] dark:border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden">
         
         {/* Subtle Decorative gears in the background */}
@@ -267,6 +268,7 @@ export default function DashboardView({
       </div>
 
       <CareerWinReporter />
+      </div>
 
       {/* 4. Modules Overview Section */}
       <div className="pt-2">
