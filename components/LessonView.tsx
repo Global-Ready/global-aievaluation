@@ -3,9 +3,10 @@ import {
   ArrowLeft, ArrowRight, Check, CheckCircle2, XCircle, 
   HelpCircle, RefreshCw, Send, Terminal, Key, ShieldAlert, BadgeCheck, AlertCircle
 } from "lucide-react";
-import { Lesson, UserStats, MiniCaseStudy } from "../types";
+import { Lesson, UserStats, MiniCaseStudy, LessonReview } from "../types";
 import { renderLessonParagraph, renderFormattedText } from "./LessonContentRenderer";
 import InlineReviewBox from "./InlineReviewBox";
+import LessonReviewsList from "./LessonReviewsList";
 
 // Collapses single line breaks (e.g. pasted from a chat UI that puts each
 // sentence on its own line) into spaces so the text wraps naturally to the
@@ -25,9 +26,10 @@ interface LessonViewProps {
   stats: UserStats;
   onBack: () => void;
   onComplete: (quizScore: number, practicePerformance: Record<string, any>) => void;
+  reviews?: LessonReview[];
 }
 
-export default function LessonView({ lesson, stats, onBack, onComplete }: LessonViewProps) {
+export default function LessonView({ lesson, stats, onBack, onComplete, reviews }: LessonViewProps) {
   const [currentSection, setCurrentSection] = useState<"lecture" | "cases">("lecture");
 
   // Section 2 / 3: Lecture page scrolling
@@ -482,7 +484,9 @@ export default function LessonView({ lesson, stats, onBack, onComplete }: Lesson
                 </div>
               </div>
 
-              {hasCaseStudies && <InlineReviewBox contextType="case_study" contextLabel={lesson.title} />}
+              {hasCaseStudies && (
+                <InlineReviewBox contextType="case_study" contextLabel={lesson.title} contextRef={lesson.id} />
+              )}
 
               <div className="pt-2 flex justify-between">
                 {hasCaseStudies ? (
@@ -505,6 +509,8 @@ export default function LessonView({ lesson, stats, onBack, onComplete }: Lesson
               </div>
             </div>
           )}
+
+          <LessonReviewsList reviews={reviews} />
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 import App from "@/App";
 import LandingGate from "@/components/LandingGate";
 import { createClient } from "@/lib/supabase/server";
-import { getModuleCurriculum, getJobs, getUserStats, getTestimonials, getSiteAnnouncement } from "@/lib/content";
+import { getModuleCurriculum, getJobs, getUserStats, getTestimonials, getSiteAnnouncement, getApprovedLessonReviews } from "@/lib/content";
 import { createServiceClient } from "@/lib/supabase/service";
 import { headers } from "next/headers";
 import { classifyDevice, classifySource } from "@/lib/analytics";
@@ -44,13 +44,14 @@ export default async function Home({
     .eq("id", user.id)
     .maybeSingle();
 
-  const [moduleCurriculum, jobs, initialStats, testimonials, announcement] =
+  const [moduleCurriculum, jobs, initialStats, testimonials, announcement, lessonReviews] =
     await Promise.all([
       getModuleCurriculum(profile?.membership_tier ?? "free"),
       getJobs(),
       getUserStats(user.id, user.email!),
       getTestimonials(),
       getSiteAnnouncement(),
+      getApprovedLessonReviews(),
     ]);
 
   return (
@@ -62,6 +63,7 @@ export default async function Home({
       isAdmin={profile?.is_admin ?? false}
       testimonials={testimonials}
       announcement={announcement}
+      lessonReviews={lessonReviews}
     />
   );
 }

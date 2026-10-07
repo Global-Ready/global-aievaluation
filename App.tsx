@@ -39,7 +39,7 @@ import {
   Gift,
 } from "lucide-react";
 
-import { UserStats, Rank, Module, Lesson, PracticeTaskSubmission, Testimonial, SiteAnnouncement } from "./types";
+import { UserStats, Rank, Module, Lesson, PracticeTaskSubmission, Testimonial, SiteAnnouncement, LessonReview } from "./types";
 import type { JobOpportunity } from "./data/jobs";
 import { syncUserProgress } from "./lib/actions/user-progress";
 import { syncMyPurchases, type LatestPurchase } from "./lib/actions/billing";
@@ -136,6 +136,7 @@ interface AppProps {
   isAdmin: boolean;
   testimonials: Testimonial[];
   announcement?: SiteAnnouncement | null;
+  lessonReviews?: Record<string, LessonReview[]>;
 }
 
 export default function App({
@@ -146,6 +147,7 @@ export default function App({
   isAdmin,
   testimonials,
   announcement,
+  lessonReviews,
 }: AppProps) {
   const practiceTabs = ["practice_overview", "practice_run"];
   // Restore the last section the user was on so a refresh doesn't always
@@ -1219,6 +1221,7 @@ export default function App({
                   stats={stats}
                   onBack={handleLessonBack}
                   onComplete={handleLessonComplete}
+                  reviews={lessonReviews?.[activeLesson.id]}
                 />
               );
             })()

@@ -166,3 +166,12 @@ export interface SiteAnnouncement {
   linkUrl?: string;
   linkLabel?: string;
 }
+
+// An approved student review (see lib/actions/user-reviews.ts), shown
+// under the lesson it was written about.
+export interface LessonReview {
+  name: string;
+  rating: number;
+  quote: string;
+  createdAt: string;
+}

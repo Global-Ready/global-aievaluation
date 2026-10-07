@@ -4,6 +4,7 @@ import type {
   UserStats,
   Testimonial,
   SiteAnnouncement,
+  LessonReview,
 } from "@/types";
 import type { JobOpportunity } from "@/data/jobs";
 import { isModuleAccessible, isSimulationPracticeAccessible, type MembershipTier } from "@/lib/access";
@@ -169,6 +170,43 @@ async function getApprovedUserReviews(): Promise<Testimonial[]> {
     quote: r.quote,
     rating: r.rating,
   }));
+}
+
+// Approved reviews written about a specific lesson's case studies, shown
+// under that lesson (not just merged into the landing page testimonials)
+// so other students browsing it can see what past students said. Keyed by
+// lesson id (context_ref) — see components/LessonView.tsx.
+export async function getApprovedLessonReviews(): Promise<Record<string, LessonReview[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_reviews")
+    .select("user_id, context_ref, rating, quote, created_at")
+    .eq("status", "approved")
+    .eq("context_type", "case_study")
+    .not("context_ref", "is", null)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(`getApprovedLessonReviews: ${error.message}`);
+    return {};
+  }
+  if (!data || data.length === 0) return {};
+
+  const userIds = [...new Set(data.map((r) => r.user_id))];
+  const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", userIds);
+  const names = new Map((profiles ?? []).map((p) => [p.id, p.display_name as string | null]));
+
+  const byLesson: Record<string, LessonReview[]> = {};
+  for (const r of data) {
+    if (!r.context_ref) continue;
+    (byLesson[r.context_ref] ??= []).push({
+      name: names.get(r.user_id) || "Global Ready AIEval student",
+      rating: r.rating,
+      quote: r.quote,
+      createdAt: r.created_at,
+    });
+  }
+  return byLesson;
 }
 
 // Singleton banner (e.g. "Next cohort starts Oct 1") shown at the top of

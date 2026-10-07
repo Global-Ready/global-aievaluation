@@ -7,6 +7,7 @@ export type ReviewContextType = "case_study" | "interview" | "practice_level";
 export async function submitUserReview(input: {
   contextType: ReviewContextType;
   contextLabel?: string;
+  contextRef?: string;
   rating: number;
   quote: string;
 }): Promise<{ error?: string }> {
@@ -28,6 +29,7 @@ export async function submitUserReview(input: {
     user_id: user.id,
     context_type: input.contextType,
     context_label: input.contextLabel?.trim().slice(0, 120) || null,
+    context_ref: input.contextRef?.trim().slice(0, 120) || null,
     rating,
     quote: quote.slice(0, 1000),
   });

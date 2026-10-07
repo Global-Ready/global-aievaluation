@@ -26,9 +26,11 @@ const CONTEXT_COPY: Record<ReviewContextType, { title: string; subtitle: string 
 export default function InlineReviewBox({
   contextType,
   contextLabel,
+  contextRef,
 }: {
   contextType: ReviewContextType;
   contextLabel?: string;
+  contextRef?: string;
 }) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -47,7 +49,7 @@ export default function InlineReviewBox({
       return;
     }
     setIsSubmitting(true);
-    const result = await submitUserReview({ contextType, contextLabel, rating, quote });
+    const result = await submitUserReview({ contextType, contextLabel, contextRef, rating, quote });
     setIsSubmitting(false);
     if (result.error) {
       setError(result.error);

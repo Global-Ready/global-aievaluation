@@ -403,6 +403,7 @@ export default function PracticeTaskRunner({
             <InlineReviewBox
               contextType="practice_level"
               contextLabel={`${domainLabel} — ${LEVEL_COPY[filter].title}`}
+              contextRef={`${domain}:${filter}`}
             />
           </div>
         </div>
