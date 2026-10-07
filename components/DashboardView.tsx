@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { UserStats, Rank, Module, SiteAnnouncement } from "../types";
 import CareerWinReporter from "./CareerWinReporter";
+import DashboardReviewPanel from "./DashboardReviewPanel";
 
 interface DashboardViewProps {
   stats: UserStats;
@@ -269,6 +270,8 @@ export default function DashboardView({
 
       <CareerWinReporter />
       </div>
+
+      <DashboardReviewPanel />
 
       {/* 4. Modules Overview Section */}
       <div className="pt-2">
