@@ -101,7 +101,7 @@ export default function DashboardView({
   };
 
   // Determine resume lesson display title and descriptions to match screenshot perfectly
-  const resumeLessonDisplayTitle = nextLesson.id === "l2" ? "Lesson 2: AI Learning" : `Lesson ${activeModule.lessons.indexOf(nextLesson) + 1}: ${nextLesson.title}`;
+  const resumeLessonDisplayTitle = nextLesson.id === "l2" ? "Lesson 2: AI Learning" : nextLesson.title;
   const resumeLessonDescription = nextLesson.id === "l2"
     ? "Master the core mechanics of artificial intelligence training, Reinforcement Learning from Human Feedback (RLHF)."
     : nextLesson.description || "In-depth training modules designed to prep you for the qualification exams.";
@@ -232,8 +232,8 @@ export default function DashboardView({
 
       {/* 3. Resume Learning + Report a Win, side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-      <div className="bg-[#F2F5FF] dark:bg-slate-900/60 border border-[#DCE4FF] dark:border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden">
-        
+      <div className="bg-[#F2F5FF] dark:bg-slate-900/60 border border-[#DCE4FF] dark:border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col gap-6 relative overflow-hidden">
+
         {/* Subtle Decorative gears in the background */}
         <div className="absolute right-0 top-0 bottom-0 w-32 h-full opacity-[0.03] dark:opacity-[0.05] pointer-events-none overflow-hidden flex items-center justify-center">
           <svg className="w-24 h-24 text-slate-900 dark:text-white fill-current animate-spin" style={{ animationDuration: "20s" }} viewBox="0 0 24 24">
@@ -248,20 +248,20 @@ export default function DashboardView({
           <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
             {resumeLessonDisplayTitle}
           </h3>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-xl">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
             {resumeLessonDescription}
           </p>
         </div>
 
-        <div className="flex flex-col items-start sm:items-center self-start sm:self-center shrink-0 relative z-10 mt-2 sm:mt-0">
-          <button 
+        <div className="flex flex-wrap items-center gap-4 relative z-10 mt-auto">
+          <button
             onClick={() => startLesson(nextLesson.id)}
-            className="bg-[#4F46E5] hover:bg-indigo-700 text-white font-extrabold py-3 px-6 rounded-2xl text-xs flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all"
+            className="bg-[#4F46E5] hover:bg-indigo-700 text-white font-extrabold py-3 px-6 rounded-2xl text-xs flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all shrink-0"
           >
             <Play className="w-3.5 h-3.5 fill-white" />
             <span>Continue</span>
           </button>
-          <p className="text-[11px] text-slate-450 dark:text-slate-500 font-semibold mt-2.5">
+          <p className="text-[11px] text-slate-450 dark:text-slate-500 font-semibold">
             {subsequentText}
           </p>
         </div>
