@@ -57,6 +57,8 @@ import LessonView from "./components/LessonView";
 import PracticeTaskRunner from "./components/PracticeTaskRunner";
 import ReadinessView from "./components/ReadinessView";
 import AffiliateView from "./components/AffiliateView";
+import ReviewPromptModal from "./components/ReviewPromptModal";
+import type { ReviewContextType } from "./lib/actions/user-reviews";
 import ProfileView from "./components/ProfileView";
 import JobsView from "./components/JobsView";
 import { renderFormattedText } from "./components/LessonContentRenderer";
@@ -189,6 +191,7 @@ export default function App({
     return (localStorage.getItem("ae-academy-practice-domain") as PracticeDomainId | null) ?? null;
   });
   const [practiceModalOpen, setPracticeModalOpen] = useState(false);
+  const [reviewPrompt, setReviewPrompt] = useState<{ contextType: ReviewContextType; contextLabel?: string } | null>(null);
   const [practiceLevel, setPracticeLevel] = useState<"beginner" | "intermediate" | "expert" | null>(() => {
     if (typeof window === "undefined") return null;
     return (localStorage.getItem("ae-academy-practice-level") as "beginner" | "intermediate" | "expert" | null) ?? null;
@@ -438,6 +441,10 @@ export default function App({
       };
     });
 
+    if (activeLesson?.miniCaseStudies?.length) {
+      setReviewPrompt({ contextType: "case_study", contextLabel: activeLesson.title });
+    }
+
     // Take user back to dashboard or modules view on complete
     if (nextLessonId) {
       setActiveLessonId(nextLessonId);
@@ -485,6 +492,7 @@ export default function App({
     });
 
     setActiveTab("dashboard");
+    setReviewPrompt({ contextType: "interview", contextLabel: interviewJobTitle ?? undefined });
     alert(
       `🎯 Simulated Workspace Finished with Accuracy of ${score}%! Vetted transcript loaded into readiness center.`,
     );
@@ -942,6 +950,14 @@ export default function App({
           onClick={() => setMobileMenuOpen(false)}
           className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden"
         ></div>
+      )}
+
+      {reviewPrompt && (
+        <ReviewPromptModal
+          contextType={reviewPrompt.contextType}
+          contextLabel={reviewPrompt.contextLabel}
+          onClose={() => setReviewPrompt(null)}
+        />
       )}
 
       {/* ================= PRIMARY MASTER LAYOUT BLOCK ================= */}
@@ -1570,6 +1586,14 @@ export default function App({
                       : practiceLevel === "intermediate"
                         ? () => setPracticeLevel("expert")
                         : undefined
+                  }
+                  onLevelComplete={() =>
+                    setReviewPrompt({
+                      contextType: "practice_level",
+                      contextLabel: `${getPracticeDomainLabel(selectedPracticeDomain)} — ${
+                        practiceLevel.charAt(0).toUpperCase() + practiceLevel.slice(1)
+                      }`,
+                    })
                   }
                 />
               )}

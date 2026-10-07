@@ -122,7 +122,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
     return [];
   }
 
-  return (data ?? []).map((t) => ({
+  const curated: Testimonial[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     role: t.role ?? undefined,
@@ -130,6 +130,44 @@ export async function getTestimonials(): Promise<Testimonial[]> {
     avatarUrl: t.avatar_url ?? undefined,
     proofImageUrl: t.proof_image_url ?? undefined,
     rating: t.rating ?? undefined,
+  }));
+
+  return [...curated, ...(await getApprovedUserReviews())];
+}
+
+const REVIEW_CONTEXT_LABEL: Record<string, string> = {
+  case_study: "Case Study",
+  interview: "AI Interview",
+  practice_level: "Real World Practice",
+};
+
+// Student-submitted reviews (see lib/actions/user-reviews.ts), shown here
+// only once an admin approves them in /admin/reviews — appended after the
+// admin-curated testimonials rather than replacing them.
+async function getApprovedUserReviews(): Promise<Testimonial[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_reviews")
+    .select("id, user_id, context_type, context_label, rating, quote, created_at")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(`getApprovedUserReviews: ${error.message}`);
+    return [];
+  }
+  if (!data || data.length === 0) return [];
+
+  const userIds = [...new Set(data.map((r) => r.user_id))];
+  const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", userIds);
+  const names = new Map((profiles ?? []).map((p) => [p.id, p.display_name as string | null]));
+
+  return data.map((r) => ({
+    id: `review_${r.id}`,
+    name: names.get(r.user_id) || "Global Ready AIEval student",
+    role: r.context_label || REVIEW_CONTEXT_LABEL[r.context_type] || undefined,
+    quote: r.quote,
+    rating: r.rating,
   }));
 }
 

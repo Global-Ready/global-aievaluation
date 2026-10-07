@@ -387,3 +387,32 @@ export async function getAdminSiteAnnouncement(): Promise<AdminSiteAnnouncementR
   if (error) throw new Error(`getAdminSiteAnnouncement: ${error.message}`);
   return data;
 }
+
+export interface AdminUserReviewRow {
+  id: string;
+  user_id: string;
+  display_name: string | null;
+  context_type: "case_study" | "interview" | "practice_level";
+  context_label: string | null;
+  rating: number;
+  quote: string;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+}
+
+export async function getAdminUserReviews(): Promise<AdminUserReviewRow[]> {
+  const supabase = await createClient();
+  const { data: reviews, error } = await supabase
+    .from("user_reviews")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(300);
+  if (error) throw new Error(`getAdminUserReviews: ${error.message}`);
+  if (!reviews || reviews.length === 0) return [];
+
+  const userIds = [...new Set(reviews.map((r) => r.user_id))];
+  const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", userIds);
+  const names = new Map((profiles ?? []).map((p) => [p.id, p.display_name as string | null]));
+
+  return reviews.map((r) => ({ ...r, display_name: names.get(r.user_id) ?? null }));
+}
