@@ -15,6 +15,7 @@ import { TEMP_DISABLE_ALL_PAYMENT_GATES } from "../lib/access";
 import { useVapiInterviewSession } from "../hooks/useVapiInterviewSession";
 import { buildVapiAssistantConfig } from "../lib/liveInterview/buildLiveConfig";
 import { PRACTICE_DOMAINS, type PracticeDomainId } from "../lib/practice-domains";
+import { logInterviewVoiceDropped } from "../lib/actions/log-interview-voice-event";
 
 interface InterviewSimulatorProps {
   stats: UserStats;
@@ -395,14 +396,29 @@ export default function InterviewSimulator({ stats, onComplete, onBack, onNaviga
       if (!e.isFinal) return;
       setChatHistory((prev) => [...prev, { sender: e.speaker, text: e.text }]);
     },
-    onStatusChange: (status) => {
-      if (status === "closed" && voiceMode === "live") {
+    onStatusChange: (status, reason) => {
+      // Vapi's endedReason naming convention consistently marks real
+      // provider/pipeline failures with "error" or "fault" in the code
+      // (e.g. "pipeline-error-google-429-exceeded-quota"); normal endings
+      // ("customer-ended-call", "silence-timeout", etc.) don't. Without
+      // this check, a genuine failure mid-conversation (voiceMode already
+      // "live") was indistinguishable from the interview finishing all its
+      // rounds normally — both silently jumped to the written exercise,
+      // with no explanation for the former.
+      const isFailure = !!reason && /error|fault/i.test(reason);
+      if (status === "closed" && voiceMode === "live" && !isFailure) {
         setLiveCallEnded(true);
         return;
       }
       if ((status === "error" || status === "closed") && !intentionalDisconnectRef.current) {
+        console.error("Vapi voice session ended unexpectedly", { status, reason });
+        logInterviewVoiceDropped(reason).catch(() => {});
         setVoiceMode("fallback");
-        setLiveStatusMessage("Voice connection lost — switched to text mode. Your progress is saved.");
+        setLiveStatusMessage(
+          reason
+            ? `Voice connection lost (${reason}) — switched to text mode. Your progress is saved.`
+            : "Voice connection lost — switched to text mode. Your progress is saved.",
+        );
         setIsInterviewerTyping(false);
       }
     },

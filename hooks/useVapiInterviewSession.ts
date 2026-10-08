@@ -12,7 +12,14 @@ export type VapiSessionStatus = "idle" | "connecting" | "connected" | "error" | 
 
 interface UseVapiInterviewSessionOptions {
   onTranscript: (e: VapiTranscriptEvent) => void;
-  onStatusChange: (status: VapiSessionStatus) => void;
+  // reason is Vapi's own endedReason code (from its end-of-call-report
+  // message — see ServerMessageEndOfCallReport in @vapi-ai/web's types),
+  // e.g. "pipeline-error-google-429-exceeded-quota" or
+  // "pipeline-error-google-403-model-access-denied". Only populated for
+  // "closed"; lets the caller tell "ran out of quota" apart from "model
+  // not available" apart from a plain network drop, instead of every
+  // voice failure looking identical.
+  onStatusChange: (status: VapiSessionStatus, reason?: string) => void;
 }
 
 export interface VapiInterviewSessionHandle {
@@ -87,10 +94,19 @@ export function useVapiInterviewSession(options: UseVapiInterviewSessionOptions)
 
       vapi.removeAllListeners();
 
+      // end-of-call-report (a "message" event) reliably arrives before
+      // call-end and carries Vapi's specific endedReason code — cache it
+      // here so call-end's handler can attach it.
+      let lastEndedReason: string | undefined;
+
       vapi.on("speech-start", () => setIsAiSpeaking(true));
       vapi.on("speech-end", () => setIsAiSpeaking(false));
 
-      vapi.on("message", (message: VapiTranscriptMessage) => {
+      vapi.on("message", (message: VapiTranscriptMessage & { endedReason?: string }) => {
+        if (message.type === "end-of-call-report") {
+          lastEndedReason = message.endedReason;
+          return;
+        }
         if (message.type !== "transcript" || message.transcriptType !== "final" || !message.transcript) return;
         optionsRef.current.onTranscript({
           speaker: message.role === "assistant" ? "interviewer" : "candidate",
@@ -101,7 +117,7 @@ export function useVapiInterviewSession(options: UseVapiInterviewSessionOptions)
 
       vapi.on("call-end", () => {
         setIsAiSpeaking(false);
-        optionsRef.current.onStatusChange("closed");
+        optionsRef.current.onStatusChange("closed", lastEndedReason);
       });
 
       vapi.on("error", (err) => {
