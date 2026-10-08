@@ -97,13 +97,14 @@ export function buildVapiAssistantConfig(params: {
     transcriber: { provider: "deepgram", model: "nova-2", language: "en" },
     model: {
       provider: "google",
-      // gemini-2.5-flash is deprecated for new API keys (confirmed via
-      // Vapi's own credential-validation error). gemini-2.5-flash-lite is
-      // the closest model Vapi's SDK has documented support for that isn't
-      // the specific one flagged as gone — swap to gemini-3.5-flash (what
-      // /api/interview-questions and /api/parse-resume already use
-      // successfully) if Vapi's platform turns out to support it too.
-      model: "gemini-2.5-flash-lite",
+      // gemini-2.5-flash was deprecated by Google and broke this call
+      // before (confirmed via Vapi's own credential-validation error);
+      // patched to gemini-2.5-flash-lite in Aug 2026. That's now ~2 months
+      // old and flash-lite/preview ids get retired fast — moved to
+      // gemini-3.5-flash, which /api/interview-questions and
+      // /api/parse-resume already use successfully against this app's own
+      // Gemini key, as the next-most-likely-current id.
+      model: "gemini-3.5-flash",
       messages: [{ role: "system", content: buildSystemInstruction(params) }],
       temperature: 0.7,
     },
