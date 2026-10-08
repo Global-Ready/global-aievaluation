@@ -82,7 +82,17 @@ export interface VapiAssistantConfig {
     waitSeconds: number;
     smartEndpointingPlan: { provider: "livekit" };
   };
+  // Vapi's specific call-failure reason (endedReason, e.g.
+  // "pipeline-error-google-429-exceeded-quota") is only ever sent to a
+  // server webhook, never to the browser SDK — this is how we actually
+  // see it. See app/api/vapi-webhook/route.ts.
+  server: { url: string; headers?: Record<string, string> };
 }
+
+// Not a real secret (it ships in the browser bundle via vapi.start()) —
+// just a basic filter against random/accidental traffic hitting the
+// webhook, since the only thing it can do is write a diagnostic row.
+export const VAPI_WEBHOOK_TOKEN = "gr-vapi-wh-f3a1c9";
 
 export function buildVapiAssistantConfig(params: {
   profileName: string;
@@ -112,6 +122,10 @@ export function buildVapiAssistantConfig(params: {
     startSpeakingPlan: {
       waitSeconds: 5,
       smartEndpointingPlan: { provider: "livekit" },
+    },
+    server: {
+      url: "https://www.globalreadyaievals.com/api/vapi-webhook",
+      headers: { "x-webhook-token": VAPI_WEBHOOK_TOKEN },
     },
   };
 }

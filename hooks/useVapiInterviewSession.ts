@@ -94,19 +94,19 @@ export function useVapiInterviewSession(options: UseVapiInterviewSessionOptions)
 
       vapi.removeAllListeners();
 
-      // end-of-call-report (a "message" event) reliably arrives before
-      // call-end and carries Vapi's specific endedReason code — cache it
-      // here so call-end's handler can attach it.
-      let lastEndedReason: string | undefined;
+      // Vapi's detailed endedReason code (e.g. "pipeline-error-google-429-
+      // exceeded-quota") only goes out via a server-side webhook
+      // (end-of-call-report is a serverMessages-only type, confirmed in
+      // @vapi-ai/web's own types) — the browser SDK never receives it, so
+      // it can't be read from here at all. The "error" event's payload is
+      // the only failure detail actually available client-side; cache it
+      // so call-end's handler can attach whatever it contains.
+      let lastClientError: unknown;
 
       vapi.on("speech-start", () => setIsAiSpeaking(true));
       vapi.on("speech-end", () => setIsAiSpeaking(false));
 
-      vapi.on("message", (message: VapiTranscriptMessage & { endedReason?: string }) => {
-        if (message.type === "end-of-call-report") {
-          lastEndedReason = message.endedReason;
-          return;
-        }
+      vapi.on("message", (message: VapiTranscriptMessage) => {
         if (message.type !== "transcript" || message.transcriptType !== "final" || !message.transcript) return;
         optionsRef.current.onTranscript({
           speaker: message.role === "assistant" ? "interviewer" : "candidate",
@@ -117,10 +117,17 @@ export function useVapiInterviewSession(options: UseVapiInterviewSessionOptions)
 
       vapi.on("call-end", () => {
         setIsAiSpeaking(false);
-        optionsRef.current.onStatusChange("closed", lastEndedReason);
+        const reason =
+          typeof lastClientError === "string"
+            ? lastClientError
+            : lastClientError
+              ? JSON.stringify(lastClientError)
+              : undefined;
+        optionsRef.current.onStatusChange("closed", reason);
       });
 
       vapi.on("error", (err) => {
+        lastClientError = err;
         console.error("Vapi call error:", err);
       });
 
