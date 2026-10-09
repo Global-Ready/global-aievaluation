@@ -594,87 +594,78 @@ export default function App({
     }
   }, [stats.settings?.pacingMode]);
 
+  const tierBadge =
+    stats.membershipTier === "career_accelerator"
+      ? { label: "Accelerator", icon: Award, className: "bg-amber-100 dark:bg-amber-950/45 text-amber-700 dark:text-amber-450" }
+      : stats.membershipTier === "professional"
+        ? { label: "Self-Paced", icon: Zap, className: "bg-indigo-100 dark:bg-indigo-950/45 text-indigo-700 dark:text-indigo-400" }
+        : stats.membershipTier === "starter"
+          ? { label: "Starter", icon: Shield, className: "bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-400" }
+          : { label: "Free", icon: Gift, className: "bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-400" };
+
+  const navLinkClass = (active: boolean) =>
+    `shrink-0 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
+      active
+        ? "bg-[#4F46E5] text-white shadow-sm font-bold"
+        : "text-slate-600 hover:text-indigo-650 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+    }`;
+
   return (
     <div
       id="app-root-container"
-      className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 flex transition-all duration-300"
+      className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col transition-all duration-300"
     >
-      {/* ================= SIDEBAR MODULE (PERSISTENT ON DESKTOP) ================= */}
-      <aside
-        id="sidebar-navigation"
-        className={`bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 w-64 fixed lg:static h-dvh lg:h-screen z-50 flex flex-col justify-between transition-transform duration-300 ${
-          mobileMenuOpen
-            ? "translate-x-0"
-            : "-translate-x-full lg:translate-x-0"
-        }`}
+      {/* ================= TOP NAVIGATION BAR ================= */}
+      <header
+        id="top-navigation-bar"
+        className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-16 shrink-0 sticky top-0 z-50 flex items-center gap-3 px-4 sm:px-6"
       >
-        <div
-          id="sidebar-top-section"
-          className="flex-1 min-h-0 p-5 space-y-6 overflow-y-auto"
-        >
-          {/* Logo Brand Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/assets/images/logos/global-logo.png"
-                alt="Global Ready AIEval"
-                width={22}
-                height={22}
-                className="shrink-0"
-              />
-              <span className="text-lg font-extrabold text-[#3B28CC] dark:text-indigo-400 tracking-tight flex items-center">
-                Global Ready AIEval
-              </span>
-            </div>
-            {/* Close Mobile sidebar */}
-            <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="lg:hidden p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Logo */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Image
+            src="/assets/images/logos/global-logo.png"
+            alt="Global Ready AIEval"
+            width={22}
+            height={22}
+            className="shrink-0"
+          />
+          <span className="hidden sm:block text-base font-extrabold text-[#3B28CC] dark:text-indigo-400 tracking-tight whitespace-nowrap">
+            Global Ready AIEval
+          </span>
+        </div>
 
-          {/* Tab Navigation links */}
-          <nav className="space-y-1">
-            <button
-              id="tab-btn-dashboard"
-              onClick={() => {
-                setActiveTab("dashboard");
-                setActiveLessonId(null);
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === "dashboard" && !activeLessonId
-                  ? "bg-[#4F46E5] text-white shadow-sm font-bold"
-                  : "text-slate-600 hover:text-indigo-650 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
-              }`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-              AI Career Hub
-            </button>
+        {/* Desktop horizontal nav */}
+        <nav className="hidden lg:flex items-center gap-1 overflow-x-auto flex-1 min-w-0">
+          <button
+            id="tab-btn-dashboard"
+            onClick={() => {
+              setActiveTab("dashboard");
+              setActiveLessonId(null);
+            }}
+            className={navLinkClass(activeTab === "dashboard" && !activeLessonId)}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            AI Career Hub
+          </button>
 
-            <button
-              id="tab-btn-modules"
-              onClick={() => {
-                setActiveTab("modules");
-                setActivePartId(null);
-                setActiveLessonId(null);
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === "modules" || activeLessonId !== null
-                  ? "bg-[#4F46E5] text-white shadow-sm font-bold"
-                  : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              Learn
-            </button>
+          <button
+            id="tab-btn-modules"
+            onClick={() => {
+              setActiveTab("modules");
+              setActivePartId(null);
+              setActiveLessonId(null);
+            }}
+            className={navLinkClass(activeTab === "modules" || activeLessonId !== null)}
+          >
+            <BookOpen className="w-4 h-4" />
+            Learn
+          </button>
 
-            {/* Real World Practice group: collapsible parent. Free users can
-                still open it and preview content — the paywall shows up
-                when they try to actually start/answer, not on navigation. */}
+          {/* Real World Practice group: a dropdown on desktop now rather
+              than an inline-expanding list. Free users can still open it
+              and preview content — the paywall shows up when they try to
+              actually start/answer, not on navigation. */}
+          <div className="relative shrink-0">
             <button
               id="tab-btn-practice-group"
               onClick={() => {
@@ -682,30 +673,26 @@ export default function App({
                 setActiveTab("practice_overview");
                 setActiveLessonId(null);
               }}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
                 practiceTabs.includes(activeTab)
-                  ? "text-indigo-650 dark:text-indigo-400"
+                  ? "text-indigo-650 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30"
                   : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
               }`}
             >
-              <div className="flex items-center gap-3">
-                <Briefcase className="w-4 h-4" />
-                Real World Practice
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                {!isSimulationPracticeAccessible(stats.membershipTier) && (
-                  <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                )}
-                {practiceGroupOpen ? (
-                  <ChevronUp className="w-3.5 h-3.5" />
-                ) : (
-                  <ChevronDown className="w-3.5 h-3.5" />
-                )}
-              </div>
+              <Briefcase className="w-4 h-4" />
+              Real World Practice
+              {!isSimulationPracticeAccessible(stats.membershipTier) && (
+                <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+              )}
+              {practiceGroupOpen ? (
+                <ChevronUp className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5" />
+              )}
             </button>
 
             {practiceGroupOpen && (
-              <div className="pl-3 space-y-1 border-l-2 border-slate-100 dark:border-slate-850 ml-4">
+              <div className="absolute left-0 top-full mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-1.5 space-y-0.5 z-50">
                 {PRACTICE_DOMAINS.map((domain) => (
                   <button
                     key={domain.id}
@@ -717,7 +704,7 @@ export default function App({
                       setActiveTab("practice_overview");
                       setActiveLessonId(null);
                       setPracticeModalOpen(true);
-                      setMobileMenuOpen(false);
+                      setPracticeGroupOpen(false);
                     }}
                     className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
                       domain.comingSoon
@@ -741,139 +728,113 @@ export default function App({
                 ))}
               </div>
             )}
+          </div>
 
-            <button
-              id="tab-btn-interview"
-              onClick={() => {
-                setInterviewInitialRoleId(null);
-                setInterviewJobTitle(null);
-                setActiveTab("interview");
-                setActiveLessonId(null);
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                activeTab === "interview"
-                  ? "bg-[#4F46E5] text-white shadow-sm font-bold"
-                  : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <MessageSquare className="w-4 h-4 text-indigo-500 dark:text-indigo-455" />
-                AI Interview Simulator
-              </div>
-              {!isPaidTier(stats.membershipTier) && (
-                <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-              )}
-            </button>
-
-            <button
-              id="tab-btn-jobs"
-              onClick={() => {
-                setActiveTab("jobs");
-                setActiveLessonId(null);
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                activeTab === "jobs"
-                  ? "bg-[#4F46E5] text-white shadow-sm font-bold"
-                  : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Briefcase className="w-4 h-4 shrink-0" />
-                Explore Opportunities
-              </div>
-              <span className="bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold shrink-0">
-                Jobs
-              </span>
-            </button>
-
-            <button
-              id="tab-btn-membership"
-              onClick={() => {
-                setActiveTab("membership");
-                setActiveLessonId(null);
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                activeTab === "membership"
-                  ? "bg-[#4F46E5] text-white shadow-sm font-bold"
-                  : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Shield className="w-4 h-4 text-indigo-500 shrink-0" />
-                Membership Tiers
-              </div>
-              <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider shrink-0 flex items-center gap-0.5">
-                <Sparkles className="w-2.5 h-2.5 text-amber-500" /> Upgrade
-              </span>
-            </button>
-
-            {!isAdmin && stats.membershipTier === "career_accelerator" && (
-              <button
-                id="tab-btn-affiliate"
-                onClick={() => {
-                  setActiveTab("affiliate");
-                  setActiveLessonId(null);
-                  setMobileMenuOpen(false);
-                }}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                  activeTab === "affiliate"
-                    ? "bg-[#4F46E5] text-white shadow-sm font-bold"
-                    : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
-                }`}
-              >
-                <Gift className={`w-4 h-4 shrink-0 ${activeTab === "affiliate" ? "text-white" : "text-indigo-500"}`} />
-                Become an Affiliate
-              </button>
+          <button
+            id="tab-btn-interview"
+            onClick={() => {
+              setInterviewInitialRoleId(null);
+              setInterviewJobTitle(null);
+              setActiveTab("interview");
+              setActiveLessonId(null);
+            }}
+            className={navLinkClass(activeTab === "interview")}
+          >
+            <MessageSquare className="w-4 h-4 text-indigo-500 dark:text-indigo-455" />
+            AI Interview Simulator
+            {!isPaidTier(stats.membershipTier) && (
+              <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
             )}
+          </button>
 
-          </nav>
-        </div>
+          <button
+            id="tab-btn-jobs"
+            onClick={() => {
+              setActiveTab("jobs");
+              setActiveLessonId(null);
+            }}
+            className={navLinkClass(activeTab === "jobs")}
+          >
+            <Briefcase className="w-4 h-4 shrink-0" />
+            Explore Opportunities
+            <span className="bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold shrink-0">
+              Jobs
+            </span>
+          </button>
 
-        {/* Profile details at bottom of Sidebar */}
-        <div
-          id="sidebar-bottom-block"
-          className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-100 dark:border-slate-800 space-y-2 shrink-0"
+          <button
+            id="tab-btn-membership"
+            onClick={() => {
+              setActiveTab("membership");
+              setActiveLessonId(null);
+            }}
+            className={navLinkClass(activeTab === "membership")}
+          >
+            <Shield className="w-4 h-4 text-indigo-500 shrink-0" />
+            Membership Tiers
+            <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider shrink-0 flex items-center gap-0.5">
+              <Sparkles className="w-2.5 h-2.5 text-amber-500" /> Upgrade
+            </span>
+          </button>
+
+          {!isAdmin && stats.membershipTier === "career_accelerator" && (
+            <button
+              id="tab-btn-affiliate"
+              onClick={() => {
+                setActiveTab("affiliate");
+                setActiveLessonId(null);
+              }}
+              className={navLinkClass(activeTab === "affiliate")}
+            >
+              <Gift className={`w-4 h-4 shrink-0 ${activeTab === "affiliate" ? "text-white" : "text-indigo-500"}`} />
+              Become an Affiliate
+            </button>
+          )}
+        </nav>
+
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          className="lg:hidden ml-auto p-2 bg-slate-100 hover:bg-slate-200 text-slate-650 rounded-lg cursor-pointer shrink-0"
         >
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+
+        {/* Right cluster (desktop): admin link, notifications, profile */}
+        <div className="hidden lg:flex items-center gap-1.5 shrink-0">
           {isAdmin && (
             <Link
               href="/admin"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition-colors cursor-pointer text-slate-650 hover:text-indigo-650 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+              title="Admin Dashboard"
+              className="p-2 rounded-lg text-slate-500 hover:text-indigo-650 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 transition-colors cursor-pointer"
             >
               <Wrench className="w-4 h-4" />
-              Admin Dashboard
             </Link>
           )}
 
-          {/* Relocated Notification Button */}
           <button
-            id="sidebar-notifications-btn"
-            className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer text-slate-650 hover:text-indigo-650 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
-            title="Notifications"
+            id="nav-notifications-btn"
+            title="Alerts & Notifications"
+            className="relative p-2 rounded-lg text-slate-500 hover:text-indigo-650 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 transition-colors cursor-pointer"
           >
-            <div className="flex items-center gap-3">
-              <svg
-                className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-              <span>Alerts & Notifications</span>
-            </div>
-            <span className="flex h-2 w-2 relative">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+            <span className="absolute top-1 right-1 flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-600"></span>
             </span>
           </button>
 
@@ -881,11 +842,11 @@ export default function App({
             onClick={() => {
               setActiveTab("profile");
               setActiveLessonId(null);
-              setMobileMenuOpen(false);
             }}
-            className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors cursor-pointer min-w-0"
+            className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors cursor-pointer min-w-0"
+            title={stats.displayName || "Account"}
           >
-            <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200 dark:border-slate-800 shrink-0">
+            <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden border border-slate-200 dark:border-slate-800 shrink-0">
               {stats.avatarUrl && /^https?:\/\//.test(stats.avatarUrl) ? (
                 <img
                   src={stats.avatarUrl}
@@ -901,49 +862,284 @@ export default function App({
                 </div>
               )}
             </div>
-            <div className="min-w-0 flex-1">
-              <h4 className="text-xs font-extrabold text-slate-800 dark:text-white truncate">
+            <div className="hidden xl:block min-w-0">
+              <h4 className="text-xs font-extrabold text-slate-800 dark:text-white truncate max-w-[9rem]">
                 {stats.displayName || "Alex Johnson"}
               </h4>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5 leading-none">
-                {activeRank}
-              </p>
-              {/* Membership Tier badge */}
-              <div className="mt-1.5 flex">
-                {stats.membershipTier === "career_accelerator" ? (
-                  <span className="bg-amber-100 dark:bg-amber-950/45 text-amber-700 dark:text-amber-450 text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
-                    <Award className="w-2.5 h-2.5 text-amber-500 shrink-0" />{" "}
-                    Accelerator
-                  </span>
-                ) : stats.membershipTier === "professional" ? (
-                  <span className="bg-indigo-100 dark:bg-indigo-950/45 text-indigo-700 dark:text-indigo-400 text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
-                    <Zap className="w-2.5 h-2.5 text-indigo-500 shrink-0" />{" "}
-                    Professional
-                  </span>
-                ) : stats.membershipTier === "starter" ? (
-                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-400 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider inline-flex items-center gap-1">
-                    <Shield className="w-2.5 h-2.5 text-slate-400 shrink-0" />{" "}
-                    Starter
-                  </span>
-                ) : (
-                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-400 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider inline-flex items-center gap-1">
-                    <Gift className="w-2.5 h-2.5 text-slate-400 shrink-0" />{" "}
-                    Free
-                  </span>
-                )}
-              </div>
+              <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 rounded-full font-black uppercase tracking-wider ${tierBadge.className}`}>
+                <tierBadge.icon className="w-2.5 h-2.5 shrink-0" />
+                {tierBadge.label}
+              </span>
             </div>
-            <Settings className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0 hover:text-slate-705 dark:hover:text-slate-300 transition-colors" />
           </div>
         </div>
-      </aside>
+      </header>
 
-      {/* Screen masking overlay for responsive mobile sidebar drawer */}
+      {/* Mobile nav dropdown panel */}
       {mobileMenuOpen && (
-        <div
-          onClick={() => setMobileMenuOpen(false)}
-          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden"
-        ></div>
+        <>
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden"
+          ></div>
+          <div className="lg:hidden fixed top-16 inset-x-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 max-h-[calc(100dvh-4rem)] overflow-y-auto shadow-lg">
+            <nav className="p-4 space-y-1">
+              <button
+                onClick={() => {
+                  setActiveTab("dashboard");
+                  setActiveLessonId(null);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left ${navLinkClass(activeTab === "dashboard" && !activeLessonId)}`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                AI Career Hub
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab("modules");
+                  setActivePartId(null);
+                  setActiveLessonId(null);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left ${navLinkClass(activeTab === "modules" || activeLessonId !== null)}`}
+              >
+                <BookOpen className="w-4 h-4" />
+                Learn
+              </button>
+
+              <button
+                onClick={() => {
+                  setPracticeGroupOpen((v) => !v);
+                  setActiveTab("practice_overview");
+                  setActiveLessonId(null);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                  practiceTabs.includes(activeTab)
+                    ? "text-indigo-650 dark:text-indigo-400"
+                    : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Real World Practice
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {!isSimulationPracticeAccessible(stats.membershipTier) && (
+                    <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                  )}
+                  {practiceGroupOpen ? (
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )}
+                </div>
+              </button>
+
+              {practiceGroupOpen && (
+                <div className="pl-3 space-y-1 border-l-2 border-slate-100 dark:border-slate-850 ml-4">
+                  {PRACTICE_DOMAINS.map((domain) => (
+                    <button
+                      key={domain.id}
+                      disabled={domain.comingSoon}
+                      onClick={() => {
+                        if (domain.comingSoon) return;
+                        setSelectedPracticeDomain(domain.id);
+                        setActiveTab("practice_overview");
+                        setActiveLessonId(null);
+                        setPracticeModalOpen(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
+                        domain.comingSoon
+                          ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
+                          : selectedPracticeDomain === domain.id
+                            ? "bg-[#4F46E5] text-white shadow-sm font-bold cursor-pointer"
+                            : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 cursor-pointer"
+                      }`}
+                    >
+                      <span>{domain.label}</span>
+                      {domain.comingSoon ? (
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
+                          Soon
+                        </span>
+                      ) : (
+                        !isSimulationPracticeAccessible(stats.membershipTier) && (
+                          <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        )
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  setInterviewInitialRoleId(null);
+                  setInterviewJobTitle(null);
+                  setActiveTab("interview");
+                  setActiveLessonId(null);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                  activeTab === "interview"
+                    ? "bg-[#4F46E5] text-white shadow-sm font-bold"
+                    : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <MessageSquare className="w-4 h-4 text-indigo-500 dark:text-indigo-455" />
+                  AI Interview Simulator
+                </div>
+                {!isPaidTier(stats.membershipTier) && (
+                  <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab("jobs");
+                  setActiveLessonId(null);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                  activeTab === "jobs"
+                    ? "bg-[#4F46E5] text-white shadow-sm font-bold"
+                    : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Briefcase className="w-4 h-4 shrink-0" />
+                  Explore Opportunities
+                </div>
+                <span className="bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold shrink-0">
+                  Jobs
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab("membership");
+                  setActiveLessonId(null);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                  activeTab === "membership"
+                    ? "bg-[#4F46E5] text-white shadow-sm font-bold"
+                    : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Shield className="w-4 h-4 text-indigo-500 shrink-0" />
+                  Membership Tiers
+                </div>
+                <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider shrink-0 flex items-center gap-0.5">
+                  <Sparkles className="w-2.5 h-2.5 text-amber-500" /> Upgrade
+                </span>
+              </button>
+
+              {!isAdmin && stats.membershipTier === "career_accelerator" && (
+                <button
+                  onClick={() => {
+                    setActiveTab("affiliate");
+                    setActiveLessonId(null);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
+                    activeTab === "affiliate"
+                      ? "bg-[#4F46E5] text-white shadow-sm font-bold"
+                      : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+                  }`}
+                >
+                  <Gift className={`w-4 h-4 shrink-0 ${activeTab === "affiliate" ? "text-white" : "text-indigo-500"}`} />
+                  Become an Affiliate
+                </button>
+              )}
+            </nav>
+
+            <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-100 dark:border-slate-800 space-y-2">
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition-colors cursor-pointer text-slate-650 hover:text-indigo-650 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+                >
+                  <Wrench className="w-4 h-4" />
+                  Admin Dashboard
+                </Link>
+              )}
+
+              <button
+                className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer text-slate-650 hover:text-indigo-650 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+                title="Notifications"
+              >
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                  <span>Alerts & Notifications</span>
+                </div>
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                </span>
+              </button>
+
+              <div
+                onClick={() => {
+                  setActiveTab("profile");
+                  setActiveLessonId(null);
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors cursor-pointer min-w-0"
+              >
+                <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200 dark:border-slate-800 shrink-0">
+                  {stats.avatarUrl && /^https?:\/\//.test(stats.avatarUrl) ? (
+                    <img
+                      src={stats.avatarUrl}
+                      alt="Profile photo"
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div
+                      className={`w-full h-full bg-gradient-to-tr ${activeAvatar.bg} flex items-center justify-center text-white text-xs font-black`}
+                    >
+                      {activeAvatar.initial}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-xs font-extrabold text-slate-800 dark:text-white truncate">
+                    {stats.displayName || "Alex Johnson"}
+                  </h4>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5 leading-none">
+                    {activeRank}
+                  </p>
+                  <div className="mt-1.5 flex">
+                    <span className={`inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${tierBadge.className}`}>
+                      <tierBadge.icon className="w-2.5 h-2.5 shrink-0" />
+                      {tierBadge.label}
+                    </span>
+                  </div>
+                </div>
+                <Settings className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0 hover:text-slate-705 dark:hover:text-slate-300 transition-colors" />
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* ================= PRIMARY MASTER LAYOUT BLOCK ================= */}
@@ -951,62 +1147,6 @@ export default function App({
         id="primary-content-scroller"
         className="flex-1 flex flex-col min-w-0 overflow-y-auto"
       >
-        {/* ================= MAIN TOP STATUS CONTROLLER BAR ================= */}
-        <header
-          id="overall-app-header"
-          className="bg-white dark:bg-slate-900 border-b border-indigo-50/50 dark:border-slate-850 h-16 shrink-0 sticky top-0 z-30 flex items-center justify-between px-6"
-        >
-          <div className="flex items-center gap-3">
-            {/* Hamburger trigger */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 bg-slate-100 hover:bg-slate-200 text-slate-650 rounded-lg cursor-pointer"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
-                {activeLessonId
-                  ? "Theoretical Lesson & Workspace"
-                  : activeTab === "dashboard"
-                    ? "AI Career Hub"
-                    : activeTab === "modules"
-                      ? "Learning Syllabus"
-                      : activeTab === "practice_overview"
-                        ? "Real World Practice"
-                        : activeTab === "practice_run"
-                          ? `${getPracticeDomainLabel(selectedPracticeDomain ?? "generalist")} / ${
-                              practiceLevel === "beginner"
-                                ? "Beginner"
-                                : practiceLevel === "intermediate"
-                                  ? "Intermediate"
-                                  : "Expert"
-                            } Practice`
-                          : activeTab === "welcome"
-                          ? "Welcome"
-                          : activeTab === "interview"
-                          ? "AI Interview Simulator"
-                          : activeTab === "membership"
-                            ? "Membership Tiers"
-                            : activeTab === "accelerator"
-                              ? "Career Accelerator Hub"
-                              : activeTab === "readiness"
-                                ? "Readiness Scores"
-                                : activeTab === "affiliate"
-                                  ? "Affiliate Program"
-                                : activeTab === "jobs"
-                                    ? "Explore Opportunities"
-                                    : activeTab === "profile"
-                                      ? "Account Settings"
-                                      : "Global Ready AIEval"}
-              </h1>
-            </div>
-          </div>
-
-          {/* Clean right header - notifications relocated to bottom-left sidebar */}
-          <div className="flex items-center gap-3.5"></div>
-        </header>
-
         {/* ================= PRIMARY MASTER RENDERING PANEL ================= */}
         <div
           id="scrollable-content-canvas"
