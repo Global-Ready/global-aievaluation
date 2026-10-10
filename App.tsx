@@ -176,6 +176,25 @@ export default function App({
     window.addEventListener("resize", updatePos);
     return () => window.removeEventListener("resize", updatePos);
   }, [practiceGroupOpen]);
+  // Trigger and panel are two separate hover zones with a small gap between
+  // them (the panel is fixed-positioned, not nested inside the trigger —
+  // see above). Closing on the trigger's onMouseLeave the instant the
+  // cursor exits meant any slightly-diagonal move toward the panel crossed
+  // that gap as "left", closing the menu before the panel's own
+  // onMouseEnter could fire. Closing is now debounced so a cursor passing
+  // through the gap toward the panel doesn't trigger a close.
+  const practiceGroupCloseTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openPracticeGroup = () => {
+    if (practiceGroupCloseTimeout.current) {
+      clearTimeout(practiceGroupCloseTimeout.current);
+      practiceGroupCloseTimeout.current = null;
+    }
+    setPracticeGroupOpen(true);
+  };
+  const scheduleClosePracticeGroup = () => {
+    if (practiceGroupCloseTimeout.current) clearTimeout(practiceGroupCloseTimeout.current);
+    practiceGroupCloseTimeout.current = setTimeout(() => setPracticeGroupOpen(false), 250);
+  };
   // Restored the same way as activeTab, but only if the saved id still
   // refers to something in the curriculum the server just sent down —
   // guards against a stale id from before content changed (or a locked
@@ -674,8 +693,8 @@ export default function App({
               navigation. */}
           <div
             className="relative shrink-0"
-            onMouseEnter={() => setPracticeGroupOpen(true)}
-            onMouseLeave={() => setPracticeGroupOpen(false)}
+            onMouseEnter={openPracticeGroup}
+            onMouseLeave={scheduleClosePracticeGroup}
           >
             <button
               ref={learnPracticeTriggerRef}
@@ -844,8 +863,8 @@ export default function App({
           so the nav's overflow-x-auto can't clip it. */}
       {practiceGroupOpen && learnPracticeDropdownPos && (
         <div
-          onMouseEnter={() => setPracticeGroupOpen(true)}
-          onMouseLeave={() => setPracticeGroupOpen(false)}
+          onMouseEnter={openPracticeGroup}
+          onMouseLeave={scheduleClosePracticeGroup}
           style={{ top: learnPracticeDropdownPos.top, left: learnPracticeDropdownPos.left }}
           className="hidden lg:block fixed w-64 z-50 dropdown-fade-in"
         >
@@ -874,10 +893,13 @@ export default function App({
                 setActiveLessonId(null);
                 setPracticeGroupOpen(false);
               }}
-              className="group w-full text-left px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-indigo-650 dark:text-slate-500 dark:hover:text-indigo-400 transition-colors cursor-pointer flex items-center justify-between"
+              className="group w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer text-slate-700 hover:bg-[#4F46E5] hover:text-white dark:text-slate-300"
             >
-              Real World Practice
-              <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+              <span className="flex items-center gap-2">
+                <ListChecks className="w-4 h-4" />
+                Real World Practice
+              </span>
+              <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             </button>
             {PRACTICE_DOMAINS.map((domain) => (
               <button
@@ -979,8 +1001,9 @@ export default function App({
                       setActiveLessonId(null);
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full text-left px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-indigo-650 dark:text-slate-500 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer text-slate-700 hover:bg-[#4F46E5] hover:text-white dark:text-slate-300"
                   >
+                    <ListChecks className="w-4 h-4" />
                     Real World Practice
                   </button>
                   {PRACTICE_DOMAINS.map((domain) => (
