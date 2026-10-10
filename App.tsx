@@ -635,7 +635,7 @@ export default function App({
         </div>
 
         {/* Desktop horizontal nav */}
-        <nav className="hidden lg:flex items-center gap-1 overflow-x-auto flex-1 min-w-0">
+        <nav className="hidden lg:flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1 min-w-0">
           <button
             id="tab-btn-dashboard"
             onClick={() => {
@@ -645,45 +645,30 @@ export default function App({
             className={navLinkClass(activeTab === "dashboard" && !activeLessonId)}
           >
             <LayoutGrid className="w-4 h-4" />
-            AI Career Hub
+            Home
           </button>
 
-          <button
-            id="tab-btn-modules"
-            onClick={() => {
-              setActiveTab("modules");
-              setActivePartId(null);
-              setActiveLessonId(null);
-            }}
-            className={navLinkClass(activeTab === "modules" || activeLessonId !== null)}
+          {/* Learn and Practice group: one dropdown combining the lesson
+              syllabus and Real World Practice, opens on hover or click. Free
+              users can still open it and preview content — the paywall
+              shows up when they try to actually start/answer, not on
+              navigation. */}
+          <div
+            className="relative shrink-0"
+            onMouseEnter={() => setPracticeGroupOpen(true)}
+            onMouseLeave={() => setPracticeGroupOpen(false)}
           >
-            <BookOpen className="w-4 h-4" />
-            Learn
-          </button>
-
-          {/* Real World Practice group: a dropdown on desktop now rather
-              than an inline-expanding list. Free users can still open it
-              and preview content — the paywall shows up when they try to
-              actually start/answer, not on navigation. */}
-          <div className="relative shrink-0">
             <button
-              id="tab-btn-practice-group"
-              onClick={() => {
-                setPracticeGroupOpen((v) => !v);
-                setActiveTab("practice_overview");
-                setActiveLessonId(null);
-              }}
+              id="tab-btn-learn-practice-group"
+              onClick={() => setPracticeGroupOpen((v) => !v)}
               className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
-                practiceTabs.includes(activeTab)
+                activeTab === "modules" || activeLessonId !== null || practiceTabs.includes(activeTab)
                   ? "text-indigo-650 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30"
                   : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
               }`}
             >
-              <Briefcase className="w-4 h-4" />
-              Real World Practice
-              {!isSimulationPracticeAccessible(stats.membershipTier) && (
-                <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-              )}
+              <BookOpen className="w-4 h-4" />
+              Learn and Practice
               {practiceGroupOpen ? (
                 <ChevronUp className="w-3.5 h-3.5" />
               ) : (
@@ -692,40 +677,63 @@ export default function App({
             </button>
 
             {practiceGroupOpen && (
-              <div className="absolute left-0 top-full mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-1.5 space-y-0.5 z-50">
-                {PRACTICE_DOMAINS.map((domain) => (
+              <div className="absolute left-0 top-full pt-1.5 w-64 z-50">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-1.5 space-y-0.5">
                   <button
-                    key={domain.id}
-                    id={`tab-btn-practice-domain-${domain.id}`}
-                    disabled={domain.comingSoon}
+                    id="tab-btn-modules"
                     onClick={() => {
-                      if (domain.comingSoon) return;
-                      setSelectedPracticeDomain(domain.id);
-                      setActiveTab("practice_overview");
+                      setActiveTab("modules");
+                      setActivePartId(null);
                       setActiveLessonId(null);
-                      setPracticeModalOpen(true);
                       setPracticeGroupOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
-                      domain.comingSoon
-                        ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
-                        : selectedPracticeDomain === domain.id
-                          ? "bg-[#4F46E5] text-white shadow-sm font-bold cursor-pointer"
-                          : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 cursor-pointer"
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer ${
+                      activeTab === "modules" || activeLessonId !== null
+                        ? "bg-[#4F46E5] text-white shadow-sm"
+                        : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-850"
                     }`}
                   >
-                    <span>{domain.label}</span>
-                    {domain.comingSoon ? (
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
-                        Soon
-                      </span>
-                    ) : (
-                      !isSimulationPracticeAccessible(stats.membershipTier) && (
-                        <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                      )
-                    )}
+                    <BookOpen className="w-4 h-4" />
+                    Learn
                   </button>
-                ))}
+
+                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Real World Practice
+                  </div>
+                  {PRACTICE_DOMAINS.map((domain) => (
+                    <button
+                      key={domain.id}
+                      id={`tab-btn-practice-domain-${domain.id}`}
+                      disabled={domain.comingSoon}
+                      onClick={() => {
+                        if (domain.comingSoon) return;
+                        setSelectedPracticeDomain(domain.id);
+                        setActiveTab("practice_overview");
+                        setActiveLessonId(null);
+                        setPracticeModalOpen(true);
+                        setPracticeGroupOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
+                        domain.comingSoon
+                          ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
+                          : selectedPracticeDomain === domain.id
+                            ? "bg-[#4F46E5] text-white shadow-sm font-bold cursor-pointer"
+                            : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 cursor-pointer"
+                      }`}
+                    >
+                      <span>{domain.label}</span>
+                      {domain.comingSoon ? (
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
+                          Soon
+                        </span>
+                      ) : (
+                        !isSimulationPracticeAccessible(stats.membershipTier) && (
+                          <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        )
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -756,10 +764,7 @@ export default function App({
             className={navLinkClass(activeTab === "jobs")}
           >
             <Briefcase className="w-4 h-4 shrink-0" />
-            Explore Opportunities
-            <span className="bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold shrink-0">
-              Jobs
-            </span>
+            Jobs
           </button>
 
           <button
@@ -893,52 +898,49 @@ export default function App({
                 className={`w-full text-left ${navLinkClass(activeTab === "dashboard" && !activeLessonId)}`}
               >
                 <LayoutGrid className="w-4 h-4" />
-                AI Career Hub
+                Home
               </button>
 
               <button
-                onClick={() => {
-                  setActiveTab("modules");
-                  setActivePartId(null);
-                  setActiveLessonId(null);
-                  setMobileMenuOpen(false);
-                }}
-                className={`w-full text-left ${navLinkClass(activeTab === "modules" || activeLessonId !== null)}`}
-              >
-                <BookOpen className="w-4 h-4" />
-                Learn
-              </button>
-
-              <button
-                onClick={() => {
-                  setPracticeGroupOpen((v) => !v);
-                  setActiveTab("practice_overview");
-                  setActiveLessonId(null);
-                }}
+                onClick={() => setPracticeGroupOpen((v) => !v)}
                 className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                  practiceTabs.includes(activeTab)
+                  activeTab === "modules" || activeLessonId !== null || practiceTabs.includes(activeTab)
                     ? "text-indigo-650 dark:text-indigo-400"
                     : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Briefcase className="w-4 h-4" />
-                  Real World Practice
+                  <BookOpen className="w-4 h-4" />
+                  Learn and Practice
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {!isSimulationPracticeAccessible(stats.membershipTier) && (
-                    <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                  )}
-                  {practiceGroupOpen ? (
-                    <ChevronUp className="w-3.5 h-3.5" />
-                  ) : (
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  )}
-                </div>
+                {practiceGroupOpen ? (
+                  <ChevronUp className="w-3.5 h-3.5 shrink-0" />
+                ) : (
+                  <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                )}
               </button>
 
               {practiceGroupOpen && (
                 <div className="pl-3 space-y-1 border-l-2 border-slate-100 dark:border-slate-850 ml-4">
+                  <button
+                    onClick={() => {
+                      setActiveTab("modules");
+                      setActivePartId(null);
+                      setActiveLessonId(null);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer ${
+                      activeTab === "modules" || activeLessonId !== null
+                        ? "bg-[#4F46E5] text-white shadow-sm"
+                        : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-850"
+                    }`}
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    Learn
+                  </button>
+                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Real World Practice
+                  </div>
                   {PRACTICE_DOMAINS.map((domain) => (
                     <button
                       key={domain.id}
@@ -1011,11 +1013,8 @@ export default function App({
               >
                 <div className="flex items-center gap-3">
                   <Briefcase className="w-4 h-4 shrink-0" />
-                  Explore Opportunities
-                </div>
-                <span className="bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold shrink-0">
                   Jobs
-                </span>
+                </div>
               </button>
 
               <button

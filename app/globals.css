@@ -92,3 +92,14 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* Fully hides the scrollbar on an overflow-x-auto element (e.g. the top
+   nav) while keeping it scrollable — used where a visible scrollbar reads
+   as a layout glitch rather than an intentional control. */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
