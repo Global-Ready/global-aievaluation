@@ -36,6 +36,7 @@ import {
   Tags,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   Gift,
 } from "lucide-react";
 
@@ -653,7 +654,7 @@ export default function App({
         </div>
 
         {/* Desktop horizontal nav */}
-        <nav className="hidden lg:flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1 min-w-0">
+        <nav className="hidden lg:flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1 min-w-0 ml-6">
           <button
             id="tab-btn-dashboard"
             onClick={() => {
@@ -857,14 +858,17 @@ export default function App({
                 setActiveLessonId(null);
                 setPracticeGroupOpen(false);
               }}
-              className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer ${
+              className={`group w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
                 activeTab === "modules" || activeLessonId !== null
                   ? "bg-[#4F46E5] text-white shadow-sm"
                   : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-850"
               }`}
             >
-              <BookOpen className="w-4 h-4" />
-              Learn
+              <span className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                Learn
+              </span>
+              <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             </button>
 
             <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -883,7 +887,7 @@ export default function App({
                   setPracticeModalOpen(true);
                   setPracticeGroupOpen(false);
                 }}
-                className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
+                className={`group w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
                   domain.comingSoon
                     ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
                     : selectedPracticeDomain === domain.id
@@ -892,15 +896,20 @@ export default function App({
                 }`}
               >
                 <span>{domain.label}</span>
-                {domain.comingSoon ? (
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
-                    Soon
-                  </span>
-                ) : (
-                  !isSimulationPracticeAccessible(stats.membershipTier) && (
-                    <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                  )
-                )}
+                <span className="flex items-center gap-1 shrink-0">
+                  {domain.comingSoon ? (
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      Soon
+                    </span>
+                  ) : (
+                    <>
+                      {!isSimulationPracticeAccessible(stats.membershipTier) && (
+                        <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                      )}
+                      <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </>
+                  )}
+                </span>
               </button>
             ))}
           </div>
