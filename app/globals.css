@@ -103,3 +103,20 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Open animation for the "Learn and Practice" nav dropdown (desktop panel
+   and mobile accordion) — these mount on open rather than transitioning
+   visibility, so the entrance is animated via a keyframe on mount. */
+@keyframes dropdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.dropdown-fade-in {
+  animation: dropdown-fade-in 0.15s ease-out;
+}

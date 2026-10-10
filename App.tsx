@@ -847,7 +847,7 @@ export default function App({
           onMouseEnter={() => setPracticeGroupOpen(true)}
           onMouseLeave={() => setPracticeGroupOpen(false)}
           style={{ top: learnPracticeDropdownPos.top, left: learnPracticeDropdownPos.left }}
-          className="hidden lg:block fixed w-64 z-50"
+          className="hidden lg:block fixed w-64 z-50 dropdown-fade-in"
         >
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-1.5 space-y-0.5">
             <button
@@ -858,11 +858,7 @@ export default function App({
                 setActiveLessonId(null);
                 setPracticeGroupOpen(false);
               }}
-              className={`group w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                activeTab === "modules" || activeLessonId !== null
-                  ? "bg-[#4F46E5] text-white shadow-sm"
-                  : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-850"
-              }`}
+              className="group w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer text-slate-700 hover:bg-[#4F46E5] hover:text-white dark:text-slate-300"
             >
               <span className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
@@ -871,9 +867,18 @@ export default function App({
               <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             </button>
 
-            <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <button
+              id="tab-btn-practice-overview"
+              onClick={() => {
+                setActiveTab("practice_overview");
+                setActiveLessonId(null);
+                setPracticeGroupOpen(false);
+              }}
+              className="group w-full text-left px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-indigo-650 dark:text-slate-500 dark:hover:text-indigo-400 transition-colors cursor-pointer flex items-center justify-between"
+            >
               Real World Practice
-            </div>
+              <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            </button>
             {PRACTICE_DOMAINS.map((domain) => (
               <button
                 key={domain.id}
@@ -890,9 +895,7 @@ export default function App({
                 className={`group w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
                   domain.comingSoon
                     ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
-                    : selectedPracticeDomain === domain.id
-                      ? "bg-[#4F46E5] text-white shadow-sm font-bold cursor-pointer"
-                      : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 cursor-pointer"
+                    : "text-slate-600 hover:bg-[#4F46E5] hover:text-white dark:text-slate-400 cursor-pointer"
                 }`}
               >
                 <span>{domain.label}</span>
@@ -957,7 +960,7 @@ export default function App({
               </button>
 
               {practiceGroupOpen && (
-                <div className="pl-3 space-y-1 border-l-2 border-slate-100 dark:border-slate-850 ml-4">
+                <div className="pl-3 space-y-1 border-l-2 border-slate-100 dark:border-slate-850 ml-4 dropdown-fade-in">
                   <button
                     onClick={() => {
                       setActiveTab("modules");
@@ -965,18 +968,21 @@ export default function App({
                       setActiveLessonId(null);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer ${
-                      activeTab === "modules" || activeLessonId !== null
-                        ? "bg-[#4F46E5] text-white shadow-sm"
-                        : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-850"
-                    }`}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer text-slate-700 hover:bg-[#4F46E5] hover:text-white dark:text-slate-300"
                   >
                     <BookOpen className="w-4 h-4" />
                     Learn
                   </button>
-                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  <button
+                    onClick={() => {
+                      setActiveTab("practice_overview");
+                      setActiveLessonId(null);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-indigo-650 dark:text-slate-500 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+                  >
                     Real World Practice
-                  </div>
+                  </button>
                   {PRACTICE_DOMAINS.map((domain) => (
                     <button
                       key={domain.id}
@@ -992,9 +998,7 @@ export default function App({
                       className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
                         domain.comingSoon
                           ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
-                          : selectedPracticeDomain === domain.id
-                            ? "bg-[#4F46E5] text-white shadow-sm font-bold cursor-pointer"
-                            : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 cursor-pointer"
+                          : "text-slate-600 hover:bg-[#4F46E5] hover:text-white dark:text-slate-400 cursor-pointer"
                       }`}
                     >
                       <span>{domain.label}</span>
