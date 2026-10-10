@@ -128,7 +128,7 @@ export default function BlogPostForm({ post }: { post?: AdminBlogPostRow }) {
           <p className="text-[11px] text-slate-450 -mt-1 mb-2">
             Supports <code>**bold**</code>, <code>## Heading</code> / <code>### Subheading</code>, and
             links as <code>[link text](https://example.com)</code>. Leave a blank line between
-            paragraphs.
+            paragraphs. Paste a YouTube link on its own line to embed it as a video player.
           </p>
           <textarea
             className={`${inputClass} font-mono`}

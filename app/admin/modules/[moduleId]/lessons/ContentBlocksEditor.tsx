@@ -143,6 +143,33 @@ export default function ContentBlocksEditor({ lessonId, blocks, onChange }: Cont
     });
   };
 
+  // Inserts a YouTube URL on its own line — renderLessonParagraph (used for
+  // both this live preview and the actual lesson page) auto-embeds any
+  // line that's nothing but a YouTube link as a video player.
+  const insertYouTubeEmbed = (idx: number) => {
+    const textarea = textareaRefs.current[blocks[idx].id];
+    if (!textarea) return;
+
+    const url = window.prompt("YouTube video URL", "https://youtu.be/");
+    if (!url) return;
+
+    const { selectionStart: start, selectionEnd: end } = textarea;
+    const text = blocks[idx].text;
+    const before = text.slice(0, start);
+    const after = text.slice(end);
+    const leadBreak = before.length > 0 && !before.endsWith("\n") ? "\n\n" : "";
+    const trailBreak = after.length > 0 && !after.startsWith("\n") ? "\n\n" : "";
+    const inserted = `${leadBreak}${url}${trailBreak}`;
+    const nextText = before + inserted + after;
+
+    updateBlock(idx, { text: nextText });
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const caret = start + inserted.length;
+      textarea.setSelectionRange(caret, caret);
+    });
+  };
+
   const handleKeyDown = (idx: number, e: KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
       e.preventDefault();
@@ -241,6 +268,16 @@ export default function ContentBlocksEditor({ lessonId, blocks, onChange }: Cont
                   >
                     <LinkIcon className="w-3 h-3" />
                     Link
+                  </button>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => insertYouTubeEmbed(idx)}
+                    className="flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 px-1.5 py-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-850"
+                    title="Embed a YouTube video"
+                  >
+                    <Video className="w-3 h-3" />
+                    YouTube
                   </button>
                 </div>
                 <textarea

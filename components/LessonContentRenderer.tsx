@@ -12,6 +12,33 @@ import type { CaseStudyMediaItem } from "../types";
 // Matches markdown-style "[label](https://example.com)" links.
 const LINK_PATTERN = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
 
+// A bare YouTube URL on its own line (no "[label](...)" wrapping — that's
+// treated as an explicit text link instead, see below) auto-embeds as a
+// player, matching how pasting a link into Notion/Medium behaves. Covers
+// watch?v=, youtu.be, embed/, and shorts/ URLs, with any trailing query
+// string (?si=, &t=, etc.) ignored.
+const YOUTUBE_URL_PATTERN =
+  /^https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&].*)?$/;
+
+function getYouTubeEmbedId(line: string): string | null {
+  const m = line.trim().match(YOUTUBE_URL_PATTERN);
+  return m ? m[1] : null;
+}
+
+function renderYouTubeEmbed(videoId: string, key: number | string) {
+  return (
+    <div key={key} className="relative w-full max-w-xl aspect-video rounded-xl overflow-hidden bg-black">
+      <iframe
+        src={`https://www.youtube.com/embed/${videoId}`}
+        title="Embedded video"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        className="absolute inset-0 w-full h-full border-0"
+      />
+    </div>
+  );
+}
+
 function renderLineWithLinks(line: string, keyPrefix: string): React.ReactNode {
   if (!line.includes("](")) return line;
 
@@ -111,6 +138,9 @@ function renderBlockMedia(media: CaseStudyMediaItem | undefined, key: number | s
 
 export function renderLessonParagraph(p: string, pIndex: number | string, media?: CaseStudyMediaItem) {
   if (!p.includes("\n")) {
+    const videoId = getYouTubeEmbedId(p);
+    if (videoId) return renderYouTubeEmbed(videoId, pIndex);
+
     const asHeading = headingMatch(p.trim());
     if (asHeading) {
       return (
@@ -136,6 +166,9 @@ export function renderLessonParagraph(p: string, pIndex: number | string, media?
       {lines.map((line, lIndex) => {
         const trimmed = line.trim();
         if (!trimmed) return <div key={lIndex} className="h-2" />;
+
+        const videoId = getYouTubeEmbedId(trimmed);
+        if (videoId) return renderYouTubeEmbed(videoId, lIndex);
 
         const asHeading = headingMatch(trimmed);
         if (asHeading) return renderHeading(asHeading.level, asHeading.text, lIndex);

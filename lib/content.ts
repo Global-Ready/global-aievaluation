@@ -134,7 +134,12 @@ export async function getTestimonials(): Promise<Testimonial[]> {
     rating: t.rating ?? undefined,
   }));
 
-  return [...curated, ...(await getApprovedUserReviews())];
+  // Freshly-approved student reviews lead the carousel (newest first,
+  // see getApprovedUserReviews' own ordering) rather than being appended
+  // after the curated testimonials — otherwise a just-approved review sits
+  // behind the ~10 curated slides and reads as "didn't show up" to whoever
+  // approved it and checks the landing page.
+  return [...(await getApprovedUserReviews()), ...curated];
 }
 
 const REVIEW_CONTEXT_LABEL: Record<string, string> = {
