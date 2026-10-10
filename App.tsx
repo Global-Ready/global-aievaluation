@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -157,6 +157,24 @@ export default function App({
     return localStorage.getItem("ae-academy-active-tab") ?? "dashboard";
   });
   const [practiceGroupOpen, setPracticeGroupOpen] = useState(false);
+  // The "Learn and Practice" dropdown panel is positioned via fixed
+  // coordinates measured from its trigger button, rather than nested
+  // inside the nav as `absolute` — the nav has overflow-x-auto for small
+  // screens, and per the CSS overflow spec that silently forces
+  // overflow-y to "auto" too (you can't have overflow-x: auto paired with
+  // overflow-y: visible), which clipped the dropdown entirely.
+  const learnPracticeTriggerRef = useRef<HTMLButtonElement>(null);
+  const [learnPracticeDropdownPos, setLearnPracticeDropdownPos] = useState<{ top: number; left: number } | null>(null);
+  useEffect(() => {
+    if (!practiceGroupOpen) return;
+    const updatePos = () => {
+      const rect = learnPracticeTriggerRef.current?.getBoundingClientRect();
+      if (rect) setLearnPracticeDropdownPos({ top: rect.bottom + 6, left: rect.left });
+    };
+    updatePos();
+    window.addEventListener("resize", updatePos);
+    return () => window.removeEventListener("resize", updatePos);
+  }, [practiceGroupOpen]);
   // Restored the same way as activeTab, but only if the saved id still
   // refers to something in the curriculum the server just sent down —
   // guards against a stale id from before content changed (or a locked
@@ -659,6 +677,7 @@ export default function App({
             onMouseLeave={() => setPracticeGroupOpen(false)}
           >
             <button
+              ref={learnPracticeTriggerRef}
               id="tab-btn-learn-practice-group"
               onClick={() => setPracticeGroupOpen((v) => !v)}
               className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
@@ -675,67 +694,6 @@ export default function App({
                 <ChevronDown className="w-3.5 h-3.5" />
               )}
             </button>
-
-            {practiceGroupOpen && (
-              <div className="absolute left-0 top-full pt-1.5 w-64 z-50">
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-1.5 space-y-0.5">
-                  <button
-                    id="tab-btn-modules"
-                    onClick={() => {
-                      setActiveTab("modules");
-                      setActivePartId(null);
-                      setActiveLessonId(null);
-                      setPracticeGroupOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer ${
-                      activeTab === "modules" || activeLessonId !== null
-                        ? "bg-[#4F46E5] text-white shadow-sm"
-                        : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-850"
-                    }`}
-                  >
-                    <BookOpen className="w-4 h-4" />
-                    Learn
-                  </button>
-
-                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Real World Practice
-                  </div>
-                  {PRACTICE_DOMAINS.map((domain) => (
-                    <button
-                      key={domain.id}
-                      id={`tab-btn-practice-domain-${domain.id}`}
-                      disabled={domain.comingSoon}
-                      onClick={() => {
-                        if (domain.comingSoon) return;
-                        setSelectedPracticeDomain(domain.id);
-                        setActiveTab("practice_overview");
-                        setActiveLessonId(null);
-                        setPracticeModalOpen(true);
-                        setPracticeGroupOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
-                        domain.comingSoon
-                          ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
-                          : selectedPracticeDomain === domain.id
-                            ? "bg-[#4F46E5] text-white shadow-sm font-bold cursor-pointer"
-                            : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 cursor-pointer"
-                      }`}
-                    >
-                      <span>{domain.label}</span>
-                      {domain.comingSoon ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
-                          Soon
-                        </span>
-                      ) : (
-                        !isSimulationPracticeAccessible(stats.membershipTier) && (
-                          <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                        )
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <button
@@ -776,7 +734,7 @@ export default function App({
             className={navLinkClass(activeTab === "membership")}
           >
             <Shield className="w-4 h-4 text-indigo-500 shrink-0" />
-            Membership Tiers
+            Pricing
             <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider shrink-0 flex items-center gap-0.5">
               <Sparkles className="w-2.5 h-2.5 text-amber-500" /> Upgrade
             </span>
@@ -879,6 +837,75 @@ export default function App({
           </div>
         </div>
       </header>
+
+      {/* "Learn and Practice" desktop dropdown — rendered here (not nested
+          inside the nav) and fixed-positioned via JS-measured coordinates
+          so the nav's overflow-x-auto can't clip it. */}
+      {practiceGroupOpen && learnPracticeDropdownPos && (
+        <div
+          onMouseEnter={() => setPracticeGroupOpen(true)}
+          onMouseLeave={() => setPracticeGroupOpen(false)}
+          style={{ top: learnPracticeDropdownPos.top, left: learnPracticeDropdownPos.left }}
+          className="hidden lg:block fixed w-64 z-50"
+        >
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-1.5 space-y-0.5">
+            <button
+              id="tab-btn-modules"
+              onClick={() => {
+                setActiveTab("modules");
+                setActivePartId(null);
+                setActiveLessonId(null);
+                setPracticeGroupOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer ${
+                activeTab === "modules" || activeLessonId !== null
+                  ? "bg-[#4F46E5] text-white shadow-sm"
+                  : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-850"
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              Learn
+            </button>
+
+            <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              Real World Practice
+            </div>
+            {PRACTICE_DOMAINS.map((domain) => (
+              <button
+                key={domain.id}
+                id={`tab-btn-practice-domain-${domain.id}`}
+                disabled={domain.comingSoon}
+                onClick={() => {
+                  if (domain.comingSoon) return;
+                  setSelectedPracticeDomain(domain.id);
+                  setActiveTab("practice_overview");
+                  setActiveLessonId(null);
+                  setPracticeModalOpen(true);
+                  setPracticeGroupOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
+                  domain.comingSoon
+                    ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
+                    : selectedPracticeDomain === domain.id
+                      ? "bg-[#4F46E5] text-white shadow-sm font-bold cursor-pointer"
+                      : "text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 cursor-pointer"
+                }`}
+              >
+                <span>{domain.label}</span>
+                {domain.comingSoon ? (
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
+                    Soon
+                  </span>
+                ) : (
+                  !isSimulationPracticeAccessible(stats.membershipTier) && (
+                    <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                  )
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Mobile nav dropdown panel */}
       {mobileMenuOpen && (
@@ -1031,7 +1058,7 @@ export default function App({
               >
                 <div className="flex items-center gap-3">
                   <Shield className="w-4 h-4 text-indigo-500 shrink-0" />
-                  Membership Tiers
+                  Pricing
                 </div>
                 <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider shrink-0 flex items-center gap-0.5">
                   <Sparkles className="w-2.5 h-2.5 text-amber-500" /> Upgrade
