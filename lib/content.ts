@@ -5,6 +5,7 @@ import type {
   Testimonial,
   SiteAnnouncement,
   LessonReview,
+  BlogPost,
 } from "@/types";
 import type { JobOpportunity } from "@/data/jobs";
 import { isModuleAccessible, isSimulationPracticeAccessible, type MembershipTier } from "@/lib/access";
@@ -317,4 +318,55 @@ export async function getUserStats(
       pacingMode: "standard",
     },
   };
+}
+
+function toBlogPost(p: Record<string, any>): BlogPost {
+  return {
+    id: p.id,
+    title: p.title,
+    excerpt: p.excerpt ?? undefined,
+    content: p.content ?? "",
+    coverImageUrl: p.cover_image_url ?? undefined,
+    category: p.category ?? undefined,
+    readMinutes: p.read_minutes ?? undefined,
+    authorName: p.author_name ?? undefined,
+    authorRole: p.author_role ?? undefined,
+    authorAvatarUrl: p.author_avatar_url ?? undefined,
+    publishedAt: p.published_at ?? undefined,
+  };
+}
+
+// Blog is genuinely empty until an admin publishes something — no seed/mock
+// posts. Public (readable by logged-out visitors), so a missing table
+// shouldn't 500 the page, same posture as getTestimonials.
+export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("is_published", true)
+    .order("sort_order")
+    .order("published_at", { ascending: false });
+
+  if (error) {
+    console.error(`getPublishedBlogPosts: ${error.message}`);
+    return [];
+  }
+  return (data ?? []).map(toBlogPost);
+}
+
+export async function getPublishedBlogPost(id: string): Promise<BlogPost | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("id", id)
+    .eq("is_published", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error(`getPublishedBlogPost: ${error.message}`);
+    return null;
+  }
+  return data ? toBlogPost(data) : null;
 }

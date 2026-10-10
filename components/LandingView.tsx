@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight, ShieldCheck, DollarSign, Clock, Globe, Lock,
   Users, CheckCircle2, ChevronDown, ChevronUp,
@@ -122,6 +123,7 @@ export default function LandingView({ onEnterPlatform, onLogin, testimonials, an
             <a href="#landing-page-root" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a>
             <a href="#what-you-do" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Platform</a>
             <a href="#who-we-are" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Who We Are</a>
+            <Link href="/blog" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Blog</Link>
             <a href="#reviews" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Reviews</a>
             <a href="#contact" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Contact</a>
           </nav>

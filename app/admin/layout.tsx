@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Briefcase, ArrowLeft, BookOpen, ClipboardCheck, Quote, Gift, Megaphone, BarChart3, Trophy, Star } from "lucide-react";
+import { Briefcase, ArrowLeft, BookOpen, ClipboardCheck, Quote, Gift, Megaphone, BarChart3, Trophy, Star, Newspaper } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 // Belt-and-suspenders alongside the /admin disallow in app/robots.ts —
@@ -150,6 +150,13 @@ export default async function AdminLayout({
           >
             <Star className="w-4 h-4" />
             Reviews
+          </Link>
+          <Link
+            href="/admin/blog"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850 transition-colors"
+          >
+            <Newspaper className="w-4 h-4" />
+            Blog
           </Link>
         </nav>
 

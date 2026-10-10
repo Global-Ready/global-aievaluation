@@ -175,3 +175,17 @@ export interface LessonReview {
   quote: string;
   createdAt: string;
 }
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  excerpt?: string;
+  content: string;
+  coverImageUrl?: string;
+  category?: string;
+  readMinutes?: number;
+  authorName?: string;
+  authorRole?: string;
+  authorAvatarUrl?: string;
+  publishedAt?: string;
+}

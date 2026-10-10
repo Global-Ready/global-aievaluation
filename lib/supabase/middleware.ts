@@ -23,6 +23,7 @@ function isPublicPath(pathname: string) {
   if (PUBLIC_PATHS.includes(pathname)) return true;
   if (pathname.startsWith("/auth/")) return true;
   if (pathname.startsWith("/api/")) return true;
+  if (pathname.startsWith("/blog")) return true;
   if (pathname.startsWith("/_next/")) return true;
   if (pathname === "/favicon.ico" || pathname === "/icon.png") return true;
   return false;

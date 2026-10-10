@@ -416,3 +416,43 @@ export async function getAdminUserReviews(): Promise<AdminUserReviewRow[]> {
 
   return reviews.map((r) => ({ ...r, display_name: names.get(r.user_id) ?? null }));
 }
+
+export interface AdminBlogPostRow {
+  id: string;
+  title: string;
+  excerpt: string | null;
+  content: string;
+  cover_image_url: string | null;
+  category: string | null;
+  read_minutes: number | null;
+  author_name: string | null;
+  author_role: string | null;
+  author_avatar_url: string | null;
+  is_published: boolean;
+  published_at: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export async function getAdminBlogPosts(): Promise<AdminBlogPostRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(`getAdminBlogPosts: ${error.message}`);
+  return data ?? [];
+}
+
+export async function getAdminBlogPost(id: string): Promise<AdminBlogPostRow | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw new Error(`getAdminBlogPost: ${error.message}`);
+  return data;
+}
