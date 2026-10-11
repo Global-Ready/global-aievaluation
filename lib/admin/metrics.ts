@@ -51,6 +51,13 @@ export interface BreakdownRow {
   count: number;
 }
 
+export interface UsersByCountryRow {
+  name: string;
+  free: number;
+  paid: number;
+  total: number;
+}
+
 export interface AffiliateSalesRow {
   userId: string;
   name: string;
@@ -79,6 +86,7 @@ export async function getMetrics(range: DateRange) {
     affiliatesRes,
     referralsRes,
     profilesRes,
+    profilesCountryRes,
   ] = await Promise.all([
     service.from("active_sessions").select("session_id", { count: "exact", head: true }).gte("last_seen", liveSince),
     (service.from("analytics_events").select("event, meta, user_id").in("event", ["landing_visit", "app_visit"]).gte("created_at", fromIso).lte("created_at", toIso)).limit(50000),
@@ -91,6 +99,7 @@ export async function getMetrics(range: DateRange) {
     service.from("affiliates").select("user_id, code"),
     (service.from("affiliate_referrals").select("affiliate_user_id, sale_amount_cents").gte("created_at", fromIso).lte("created_at", toIso)),
     service.from("profiles").select("id, display_name"),
+    service.from("profiles").select("country, membership_tier"),
   ]);
 
   // Visits: landing (logged out) and app (logged in), split by source and device.
@@ -98,12 +107,15 @@ export async function getMetrics(range: DateRange) {
   const landingVisits = visits.filter((v) => v.event === "landing_visit").length;
   const sources = new Map<string, number>();
   const devices = new Map<string, number>();
+  const countries = new Map<string, number>();
   for (const v of visits) {
-    const meta = (v.meta ?? {}) as { source?: string; device?: string };
+    const meta = (v.meta ?? {}) as { source?: string; device?: string; country?: string | null };
     const s = meta.source ?? "unknown";
     const d = meta.device ?? "unknown";
+    const c = meta.country ?? "Unknown";
     sources.set(s, (sources.get(s) ?? 0) + 1);
     devices.set(d, (devices.get(d) ?? 0) + 1);
+    countries.set(c, (countries.get(c) ?? 0) + 1);
   }
   const topSources: BreakdownRow[] = [...sources.entries()]
     .map(([name, count]) => ({ name, count }))
@@ -112,6 +124,27 @@ export async function getMetrics(range: DateRange) {
   const deviceRows: BreakdownRow[] = [...devices.entries()]
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count);
+  const countryRows: BreakdownRow[] = [...countries.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 15);
+
+  // Every account's country and paid/free status — an attribute of the
+  // profile, not a dated event, so (unlike the breakdowns above) this
+  // covers all accounts ever created rather than just the selected range.
+  const usersByCountry: UsersByCountryRow[] = (() => {
+    const byCountry = new Map<string, { free: number; paid: number }>();
+    for (const p of profilesCountryRes.data ?? []) {
+      const c = p.country ?? "Unknown";
+      const entry = byCountry.get(c) ?? { free: 0, paid: 0 };
+      if (p.membership_tier && p.membership_tier !== "free") entry.paid += 1;
+      else entry.free += 1;
+      byCountry.set(c, entry);
+    }
+    return [...byCountry.entries()]
+      .map(([name, { free, paid }]) => ({ name, free, paid, total: free + paid }))
+      .sort((a, b) => b.total - a.total);
+  })();
 
   // Refunds issued by Stripe within the range.
   let refunds: number | null = null;
@@ -179,5 +212,5 @@ export async function getMetrics(range: DateRange) {
     ...(sales.get(a.user_id) ?? { sales: 0, salesCents: 0 }),
   }));
 
-  return { metrics, topSources, deviceRows, affiliateSales };
+  return { metrics, topSources, deviceRows, countryRows, usersByCountry, affiliateSales };
 }

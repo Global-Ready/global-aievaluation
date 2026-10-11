@@ -24,7 +24,7 @@ export default async function AdminMetricsPage({
 }) {
   const params = await searchParams;
   const range = resolveRange(params);
-  const { metrics, topSources, deviceRows, affiliateSales } = await getMetrics(range);
+  const { metrics, topSources, deviceRows, countryRows, usersByCountry, affiliateSales } = await getMetrics(range);
   const visitTotal = deviceRows.reduce((sum, d) => sum + d.count, 0);
 
   return (
@@ -99,7 +99,7 @@ export default async function AdminMetricsPage({
         </table>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
           <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Where visitors came from</h3>
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
@@ -152,6 +152,66 @@ export default async function AdminMetricsPage({
               </tbody>
             </table>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Where visitors are located</h3>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+            <table className="w-full text-xs">
+              <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
+                <tr>
+                  <th className="text-left px-4 py-3">Country</th>
+                  <th className="text-right px-4 py-3">Visits</th>
+                  <th className="text-right px-4 py-3">Share</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                {countryRows.map((c) => (
+                  <tr key={c.name}>
+                    <td className="px-4 py-2.5 text-slate-900 dark:text-white">{c.name}</td>
+                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">{c.count}</td>
+                    <td className="px-4 py-2.5 text-right text-slate-500">{pct(c.count, visitTotal)}</td>
+                  </tr>
+                ))}
+                {countryRows.length === 0 && (
+                  <tr><td colSpan={3} className="px-4 py-6 text-center text-slate-400">No visits in this range.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Accounts by country — paid vs free</h3>
+        <p className="text-[11px] text-slate-450 -mt-1">
+          All accounts ever created, not just this range. "Unknown" is anyone who signed up before country
+          tracking was added, or who hasn't loaded the app since.
+        </p>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+          <table className="w-full text-xs">
+            <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
+              <tr>
+                <th className="text-left px-4 py-3">Country</th>
+                <th className="text-right px-4 py-3">Paid</th>
+                <th className="text-right px-4 py-3">Free</th>
+                <th className="text-right px-4 py-3">Total</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+              {usersByCountry.map((c) => (
+                <tr key={c.name}>
+                  <td className="px-4 py-2.5 text-slate-900 dark:text-white">{c.name}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">{c.paid}</td>
+                  <td className="px-4 py-2.5 text-right text-slate-500">{c.free}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">{c.total}</td>
+                </tr>
+              ))}
+              {usersByCountry.length === 0 && (
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-400">No accounts yet.</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
