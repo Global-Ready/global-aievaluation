@@ -673,7 +673,7 @@ export default function App({
         </div>
 
         {/* Desktop horizontal nav */}
-        <nav className="hidden lg:flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1 min-w-0 ml-6">
+        <nav className="hidden lg:flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide flex-1 min-w-0">
           <button
             id="tab-btn-dashboard"
             onClick={() => {
