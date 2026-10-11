@@ -38,6 +38,7 @@ import {
   ChevronUp,
   ChevronRight,
   Gift,
+  Newspaper,
 } from "lucide-react";
 
 import { UserStats, Rank, Module, Lesson, PracticeTaskSubmission, Testimonial, SiteAnnouncement, LessonReview } from "./types";
@@ -745,6 +746,11 @@ export default function App({
             Jobs
           </button>
 
+          <Link id="tab-btn-blog" href="/blog" className={navLinkClass(false)}>
+            <Newspaper className="w-4 h-4 shrink-0" />
+            Blog
+          </Link>
+
           <button
             id="tab-btn-membership"
             onClick={() => {
@@ -1079,6 +1085,15 @@ export default function App({
                   Jobs
                 </div>
               </button>
+
+              <Link
+                href="/blog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 transition-colors cursor-pointer text-slate-600 hover:text-indigo-655 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-850"
+              >
+                <Newspaper className="w-4 h-4 shrink-0" />
+                Blog
+              </Link>
 
               <button
                 onClick={() => {

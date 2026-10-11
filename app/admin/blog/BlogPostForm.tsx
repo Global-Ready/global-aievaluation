@@ -6,6 +6,7 @@ import { Loader2, ShieldAlert, Upload } from "lucide-react";
 import { createBlogPost, updateBlogPost } from "@/lib/actions/admin-blog";
 import { isRedirectError } from "@/lib/is-redirect-error";
 import type { AdminBlogPostRow } from "@/lib/admin/queries";
+import BoldTextarea from "@/app/admin/BoldTextarea";
 
 const inputClass =
   "w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500";
@@ -126,15 +127,17 @@ export default function BlogPostForm({ post }: { post?: AdminBlogPostRow }) {
         <div className="sm:col-span-2">
           <label className={labelClass}>Content</label>
           <p className="text-[11px] text-slate-450 -mt-1 mb-2">
-            Supports <code>**bold**</code>, <code>## Heading</code> / <code>### Subheading</code>, and
-            links as <code>[link text](https://example.com)</code>. Leave a blank line between
-            paragraphs. Paste a YouTube link on its own line to embed it as a video player.
+            Use the Bold/Link/YouTube/Image buttons below, or type <code>**bold**</code>,
+            <code> ## Heading</code> / <code>### Subheading</code>, and links as{" "}
+            <code>[link text](https://example.com)</code> directly. Leave a blank line between
+            paragraphs.
           </p>
-          <textarea
+          <BoldTextarea
+            value={content}
+            onChange={setContent}
             className={`${inputClass} font-mono`}
             rows={16}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            showMediaEmbeds
           />
         </div>
 

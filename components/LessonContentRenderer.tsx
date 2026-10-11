@@ -39,6 +39,41 @@ function renderYouTubeEmbed(videoId: string, key: number | string) {
   );
 }
 
+// A bare image URL on its own line auto-embeds, same convention as the
+// YouTube case above. "[img:IMAGE_URL](LINK_URL)" on its own line embeds a
+// clickable image — a deliberately simpler syntax than the standard nested
+// markdown image-in-link ("[![alt](img)](link)"), which doesn't tokenize
+// cleanly with this renderer's single-pass regexes.
+const IMAGE_URL_PATTERN = /^https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S*)?$/i;
+const IMAGE_LINK_PATTERN = /^\[img:(https?:\/\/\S+?)\]\((https?:\/\/\S+)\)$/i;
+
+function renderImageEmbed(src: string, key: number | string, href?: string) {
+  const img = <img src={src} alt="" className="rounded-xl max-w-full max-h-96 w-auto object-contain" />;
+  return (
+    <div key={key} className="max-w-xl">
+      {href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {img}
+        </a>
+      ) : (
+        img
+      )}
+    </div>
+  );
+}
+
+// Checked against a full (trimmed) line before any inline formatting, since
+// all three embeds (video, image, clickable image) only make sense as a
+// line of their own rather than mixed into running text.
+function renderLineEmbed(trimmedLine: string, key: number | string): React.ReactNode | null {
+  const imageLinkMatch = trimmedLine.match(IMAGE_LINK_PATTERN);
+  if (imageLinkMatch) return renderImageEmbed(imageLinkMatch[1], key, imageLinkMatch[2]);
+  if (IMAGE_URL_PATTERN.test(trimmedLine)) return renderImageEmbed(trimmedLine, key);
+  const videoId = getYouTubeEmbedId(trimmedLine);
+  if (videoId) return renderYouTubeEmbed(videoId, key);
+  return null;
+}
+
 function renderLineWithLinks(line: string, keyPrefix: string): React.ReactNode {
   if (!line.includes("](")) return line;
 
@@ -138,8 +173,8 @@ function renderBlockMedia(media: CaseStudyMediaItem | undefined, key: number | s
 
 export function renderLessonParagraph(p: string, pIndex: number | string, media?: CaseStudyMediaItem) {
   if (!p.includes("\n")) {
-    const videoId = getYouTubeEmbedId(p);
-    if (videoId) return renderYouTubeEmbed(videoId, pIndex);
+    const embed = renderLineEmbed(p.trim(), pIndex);
+    if (embed) return embed;
 
     const asHeading = headingMatch(p.trim());
     if (asHeading) {
@@ -167,8 +202,8 @@ export function renderLessonParagraph(p: string, pIndex: number | string, media?
         const trimmed = line.trim();
         if (!trimmed) return <div key={lIndex} className="h-2" />;
 
-        const videoId = getYouTubeEmbedId(trimmed);
-        if (videoId) return renderYouTubeEmbed(videoId, lIndex);
+        const embed = renderLineEmbed(trimmed, lIndex);
+        if (embed) return embed;
 
         const asHeading = headingMatch(trimmed);
         if (asHeading) return renderHeading(asHeading.level, asHeading.text, lIndex);

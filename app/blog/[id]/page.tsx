@@ -92,7 +92,7 @@ export default async function BlogPostPage({
           <img src={post.coverImageUrl} alt="" className="w-full rounded-2xl border border-slate-200 dark:border-slate-800" />
         )}
 
-        <div className="prose prose-slate dark:prose-invert max-w-none space-y-4">
+        <div className="space-y-2">
           {paragraphs.map((p, i) => renderLessonParagraph(p, i))}
         </div>
 
