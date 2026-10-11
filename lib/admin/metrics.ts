@@ -66,6 +66,36 @@ export interface AffiliateSalesRow {
   salesCents: number;
 }
 
+const PAGE_SIZE = 1000;
+
+// Supabase/PostgREST caps any single response at the project's configured
+// max-rows limit (1000 on this project) regardless of an explicit .limit()
+// value passed from the client — it silently truncates instead of erroring,
+// so a query for "every row of a growing table" quietly under-reports once
+// the table passes that count rather than failing loudly. Found via the
+// country breakdown going almost entirely "Unknown" once profiles passed
+// 1000 rows, despite country data actually being recorded correctly. Any
+// query here that needs the whole table (not scoped to something that'll
+// safely stay small) pages through with .range() instead.
+async function fetchAllRows<T>(
+  pageQuery: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+): Promise<T[]> {
+  const all: T[] = [];
+  let from = 0;
+  for (;;) {
+    const { data, error } = await pageQuery(from, from + PAGE_SIZE - 1);
+    if (error) {
+      console.error("fetchAllRows", error.message);
+      break;
+    }
+    if (!data || data.length === 0) break;
+    all.push(...data);
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return all;
+}
+
 // Admin-only: callers must already be behind the admin layout's auth check.
 export async function getMetrics(range: DateRange) {
   const service = createServiceClient();
@@ -73,37 +103,47 @@ export async function getMetrics(range: DateRange) {
   const toIso = range.to.toISOString();
   const liveSince = new Date(Date.now() - LIVE_WINDOW_MS).toISOString();
 
-
   const [
     liveRes,
-    visitsRes,
+    visits,
     linkClicksRes,
     checkoutsRes,
     purchasesRes,
-    progressRes,
+    progressRows,
     lessonsRes,
     winsRes,
     affiliatesRes,
     referralsRes,
-    profilesRes,
-    profilesCountryRes,
+    profilesAll,
+    profilesCountry,
   ] = await Promise.all([
     service.from("active_sessions").select("session_id", { count: "exact", head: true }).gte("last_seen", liveSince),
-    (service.from("analytics_events").select("event, meta, user_id").in("event", ["landing_visit", "app_visit"]).gte("created_at", fromIso).lte("created_at", toIso)).limit(50000),
+    fetchAllRows<{ event: string; meta: unknown; user_id: string | null }>((from, to) =>
+      service
+        .from("analytics_events")
+        .select("event, meta, user_id")
+        .in("event", ["landing_visit", "app_visit"])
+        .gte("created_at", fromIso)
+        .lte("created_at", toIso)
+        .range(from, to),
+    ),
     (service.from("analytics_events").select("id", { count: "exact", head: true }).eq("event", "referral_link_click").gte("created_at", fromIso).lte("created_at", toIso)),
     (service.from("analytics_events").select("id", { count: "exact", head: true }).eq("event", "checkout_started").gte("created_at", fromIso).lte("created_at", toIso)),
     (service.from("purchases").select("id", { count: "exact", head: true }).eq("status", "completed").not("stripe_checkout_session_id", "like", "manual_grant_%").gte("created_at", fromIso).lte("created_at", toIso)),
-    service.from("user_progress").select("user_id, completed_lessons, practice_task_submissions"),
+    fetchAllRows<{ user_id: string; completed_lessons: string[] | null; practice_task_submissions: Record<string, { submittedAt?: string }> | null }>((from, to) =>
+      service.from("user_progress").select("user_id, completed_lessons, practice_task_submissions").range(from, to),
+    ),
     service.from("lessons").select("id"),
     (service.from("career_wins").select("user_id, kind").gte("created_at", fromIso).lte("created_at", toIso)),
     service.from("affiliates").select("user_id, code"),
     (service.from("affiliate_referrals").select("affiliate_user_id, sale_amount_cents").gte("created_at", fromIso).lte("created_at", toIso)),
-    service.from("profiles").select("id, display_name"),
-    service.from("profiles").select("country, membership_tier"),
+    fetchAllRows<{ id: string; display_name: string | null }>((from, to) =>
+      service.from("profiles").select("id, display_name").range(from, to),
+    ),
+    fetchAllRows<{ country: string | null; membership_tier: string | null }>((from, to) =>
+      service.from("profiles").select("country, membership_tier").range(from, to),
+    ),
   ]);
-
-  // Visits: landing (logged out) and app (logged in), split by source and device.
-  const visits = visitsRes.data ?? [];
   const landingVisits = visits.filter((v) => v.event === "landing_visit").length;
   const sources = new Map<string, number>();
   const devices = new Map<string, number>();
@@ -134,7 +174,7 @@ export async function getMetrics(range: DateRange) {
   // covers all accounts ever created rather than just the selected range.
   const usersByCountry: UsersByCountryRow[] = (() => {
     const byCountry = new Map<string, { free: number; paid: number }>();
-    for (const p of profilesCountryRes.data ?? []) {
+    for (const p of profilesCountry) {
       const c = p.country ?? "Unknown";
       const entry = byCountry.get(c) ?? { free: 0, paid: 0 };
       if (p.membership_tier && p.membership_tier !== "free") entry.paid += 1;
@@ -163,7 +203,6 @@ export async function getMetrics(range: DateRange) {
   }
 
   // Practice submissions carry their own timestamp, so they filter by range.
-  const progressRows = progressRes.data ?? [];
   let assessments = 0;
   for (const row of progressRows) {
     const subs = Object.values(row.practice_task_submissions ?? {}) as { submittedAt?: string }[];
@@ -197,7 +236,7 @@ export async function getMetrics(range: DateRange) {
     { key: "students_secured", label: "Students who secured an interview or project", value: winners, note: "Distinct students with at least one report." },
   ];
 
-  const names = new Map((profilesRes.data ?? []).map((p) => [p.id, p.display_name as string | null]));
+  const names = new Map(profilesAll.map((p) => [p.id, p.display_name]));
   const sales = new Map<string, { sales: number; salesCents: number }>();
   for (const r of referralsRes.data ?? []) {
     const s = sales.get(r.affiliate_user_id) ?? { sales: 0, salesCents: 0 };
