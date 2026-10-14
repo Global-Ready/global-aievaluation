@@ -82,7 +82,7 @@ export default function BoldTextarea({
     const { selectionStart: start, selectionEnd: end } = textarea;
     const selected = value.slice(start, end);
 
-    const url = window.prompt("Link URL", "https://");
+    const url = window.prompt("Paste the full link URL (e.g. https://example.com)");
     if (!url) return;
 
     const before = value.slice(0, start);
@@ -121,21 +121,21 @@ export default function BoldTextarea({
   };
 
   const insertYouTubeEmbed = () => {
-    const url = window.prompt("YouTube video URL", "https://youtu.be/");
+    const url = window.prompt("Paste the full YouTube video URL (e.g. https://youtu.be/VIDEO_ID)");
     if (!url) return;
     insertOwnLine(url);
   };
 
   const insertImage = () => {
-    const url = window.prompt("Image URL", "https://");
+    const url = window.prompt("Paste the full image URL");
     if (!url) return;
     insertOwnLine(url);
   };
 
   const insertImageWithLink = () => {
-    const imageUrl = window.prompt("Image URL", "https://");
+    const imageUrl = window.prompt("Paste the full image URL");
     if (!imageUrl) return;
-    const linkUrl = window.prompt("Where should clicking the image go?", "https://");
+    const linkUrl = window.prompt("Paste the full URL to open when the image is clicked");
     if (!linkUrl) return;
     insertOwnLine(`[img:${imageUrl}](${linkUrl})`);
   };

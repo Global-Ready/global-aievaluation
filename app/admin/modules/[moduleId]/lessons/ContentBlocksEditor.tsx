@@ -128,7 +128,7 @@ export default function ContentBlocksEditor({ lessonId, blocks, onChange }: Cont
     const text = blocks[idx].text;
     const selected = text.slice(start, end);
 
-    const url = window.prompt("Link URL", "https://");
+    const url = window.prompt("Paste the full link URL (e.g. https://example.com)");
     if (!url) return;
 
     const before = text.slice(0, start);
@@ -150,7 +150,7 @@ export default function ContentBlocksEditor({ lessonId, blocks, onChange }: Cont
     const textarea = textareaRefs.current[blocks[idx].id];
     if (!textarea) return;
 
-    const url = window.prompt("YouTube video URL", "https://youtu.be/");
+    const url = window.prompt("Paste the full YouTube video URL (e.g. https://youtu.be/VIDEO_ID)");
     if (!url) return;
 
     const { selectionStart: start, selectionEnd: end } = textarea;

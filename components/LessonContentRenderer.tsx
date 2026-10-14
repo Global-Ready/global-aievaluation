@@ -16,9 +16,12 @@ const LINK_PATTERN = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
 // treated as an explicit text link instead, see below) auto-embeds as a
 // player, matching how pasting a link into Notion/Medium behaves. Covers
 // watch?v=, youtu.be, embed/, and shorts/ URLs, with any trailing query
-// string (?si=, &t=, etc.) ignored.
+// string (?si=, &t=, etc.) ignored. The prefix group repeats ("+") to
+// tolerate a doubled "https://youtu.be/https://youtu.be/VIDEO_ID" — the
+// toolbar's insert prompt pre-fills "https://youtu.be/", and pasting a full
+// URL without clearing that first produces exactly this duplication.
 const YOUTUBE_URL_PATTERN =
-  /^https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&].*)?$/;
+  /^(?:https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/))+([a-zA-Z0-9_-]{11})(?:[?&].*)?$/;
 
 function getYouTubeEmbedId(line: string): string | null {
   const m = line.trim().match(YOUTUBE_URL_PATTERN);
