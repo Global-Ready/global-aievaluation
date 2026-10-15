@@ -169,7 +169,7 @@ export default function LessonView({ lesson, stats, onBack, onComplete, reviews 
             </div>
 
             {/* Lecture paragraph scroller */}
-            <div className="prose prose-slate dark:prose-invert text-sm leading-relaxed text-slate-700 dark:text-slate-350 space-y-4">
+            <div className="text-sm leading-relaxed text-slate-700 dark:text-slate-350 space-y-2">
               {lesson.content.map((block, i) => renderLessonParagraph(block.text, i, block.media?.[0]))}
             </div>
 
