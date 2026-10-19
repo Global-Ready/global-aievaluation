@@ -145,7 +145,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 const REVIEW_CONTEXT_LABEL: Record<string, string> = {
   case_study: "Case Study",
   interview: "AI Interview",
-  practice_level: "Real World Practice",
+  practice_level: "Assessment",
 };
 
 // Student-submitted reviews (see lib/actions/user-reviews.ts), shown here

@@ -55,6 +55,29 @@ function readFile(formData: FormData, key: string): File | null {
   return file instanceof File && file.size > 0 ? file : null;
 }
 
+// Uploads an image dropped inline into a post's content (not the cover
+// image) and hands back its public URL, which the editor inserts on its
+// own line — renderLessonParagraph auto-embeds a bare image URL there. Not
+// tied to any specific post id (a new post may not have one finalized yet),
+// so it just needs a unique-enough path.
+export async function uploadBlogContentImage(formData: FormData): Promise<{ url?: string; error?: string }> {
+  const file = readFile(formData, "file");
+  if (!file) return { error: "No file provided." };
+  if (!file.type.startsWith("image/")) return { error: "Only image files are supported." };
+  if (file.size > MAX_FILE_BYTES) return { error: `${file.name} is too large (max 5MB).` };
+
+  const supabase = await createClient();
+  const path = `content/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${slugFileName(file.name)}`;
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, file, { contentType: file.type || undefined });
+
+  if (error) return { error: `Upload failed: ${error.message}` };
+
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
 export async function createBlogPost(id: string, formData: FormData): Promise<{ error?: string }> {
   const idError = validateSlugId(id);
   if (idError) return { error: idError };

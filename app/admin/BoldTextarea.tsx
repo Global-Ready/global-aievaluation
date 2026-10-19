@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, type KeyboardEvent } from "react";
-import { Bold, Link as LinkIcon, Video, Image as ImageIcon, ImagePlus } from "lucide-react";
+import { useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
+import { Bold, Link as LinkIcon, Video, Image as ImageIcon, ImagePlus, Upload, Loader2 } from "lucide-react";
 import { renderFormattedText, renderLessonParagraph } from "@/components/LessonContentRenderer";
 
 const DEFAULT_CLASS =
@@ -18,6 +18,11 @@ interface BoldTextareaProps {
   // Adds YouTube / Image / Image+Link buttons alongside Bold/Link — for
   // long-form content fields (e.g. blog posts), not short free-text ones.
   showMediaEmbeds?: boolean;
+  // When provided (alongside showMediaEmbeds), adds an "Upload Image"
+  // button that uploads a file via this callback and embeds the returned
+  // URL — the caller supplies the actual upload (which storage bucket,
+  // whatever path-naming it needs), this component just wires up the UI.
+  onUploadImage?: (file: File) => Promise<{ url?: string; error?: string }>;
 }
 
 // Reusable "**bold**" toggle for admin free-text fields — highlight text,
@@ -33,8 +38,12 @@ export default function BoldTextarea({
   required,
   showPreview = true,
   showMediaEmbeds = false,
+  onUploadImage,
 }: BoldTextareaProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const toggleBold = () => {
     const textarea = textareaRef.current;
@@ -140,6 +149,32 @@ export default function BoldTextarea({
     insertOwnLine(`[img:${imageUrl}](${linkUrl})`);
   };
 
+  const handleUploadButtonClick = () => {
+    setUploadError(null);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file next time
+    if (!file || !onUploadImage) return;
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const result = await onUploadImage(file);
+      if (result.error) {
+        setUploadError(result.error);
+      } else if (result.url) {
+        insertOwnLine(result.url);
+      }
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
       e.preventDefault();
@@ -186,15 +221,28 @@ export default function BoldTextarea({
               <Video className="w-3 h-3" />
               YouTube
             </button>
+            {onUploadImage && (
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleUploadButtonClick}
+                disabled={uploading}
+                className="flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 px-1.5 py-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-60"
+                title="Upload an image from your device"
+              >
+                {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                {uploading ? "Uploading…" : "Upload Image"}
+              </button>
+            )}
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={insertImage}
               className="flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 px-1.5 py-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-850"
-              title="Insert an image"
+              title="Insert an image from a URL"
             >
               <ImageIcon className="w-3 h-3" />
-              Image
+              Image URL
             </button>
             <button
               type="button"
@@ -209,6 +257,15 @@ export default function BoldTextarea({
           </>
         )}
       </div>
+      {onUploadImage && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileSelected}
+        />
+      )}
       <textarea
         ref={textareaRef}
         className={className ?? DEFAULT_CLASS}
@@ -219,6 +276,7 @@ export default function BoldTextarea({
         placeholder={placeholder}
         required={required}
       />
+      {uploadError && <p className="text-[10px] font-semibold text-rose-500">{uploadError}</p>}
       {showPreview && value.trim() && (
         <div className="rounded-lg border border-slate-150 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 px-3 py-2">
           <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Preview</p>

@@ -47,9 +47,9 @@ const COMPETENCY_KEYS = [
 // unreachable from any nav — exactly the kind of fabricated specificity
 // this endpoint exists to stop doing).
 const VALID_GROWTH_POINTERS = [
-  "Real World Practice — Beginner",
-  "Real World Practice — Intermediate",
-  "Real World Practice — Expert",
+  "Assessment — Beginner",
+  "Assessment — Intermediate",
+  "Assessment — Expert",
   "Module Lessons",
   "AI Interview Practice",
 ];

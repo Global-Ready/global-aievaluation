@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, ShieldAlert, Upload } from "lucide-react";
-import { createBlogPost, updateBlogPost } from "@/lib/actions/admin-blog";
+import { createBlogPost, updateBlogPost, uploadBlogContentImage } from "@/lib/actions/admin-blog";
 import { isRedirectError } from "@/lib/is-redirect-error";
 import type { AdminBlogPostRow } from "@/lib/admin/queries";
 import BoldTextarea from "@/app/admin/BoldTextarea";
@@ -33,6 +33,12 @@ export default function BlogPostForm({ post }: { post?: AdminBlogPostRow }) {
 
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleUploadContentImage = async (file: File) => {
+    const formData = new FormData();
+    formData.set("file", file);
+    return uploadBlogContentImage(formData);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,7 +133,7 @@ export default function BlogPostForm({ post }: { post?: AdminBlogPostRow }) {
         <div className="sm:col-span-2">
           <label className={labelClass}>Content</label>
           <p className="text-[11px] text-slate-450 -mt-1 mb-2">
-            Use the Bold/Link/YouTube/Image buttons below, or type <code>**bold**</code>,
+            Use the Bold/Link/YouTube/Upload Image buttons below, or type <code>**bold**</code>,
             <code> ## Heading</code> / <code>### Subheading</code>, and links as{" "}
             <code>[link text](https://example.com)</code> directly. Leave a blank line between
             paragraphs.
@@ -138,6 +144,7 @@ export default function BlogPostForm({ post }: { post?: AdminBlogPostRow }) {
             className={`${inputClass} font-mono`}
             rows={16}
             showMediaEmbeds
+            onUploadImage={handleUploadContentImage}
           />
         </div>
 

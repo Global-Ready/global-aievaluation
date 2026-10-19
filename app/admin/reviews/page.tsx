@@ -21,8 +21,8 @@ export default async function AdminReviewsPage() {
       <div>
         <h2 className="text-xl font-black text-slate-900 dark:text-white">Student Reviews</h2>
         <p className="text-xs text-slate-450 mt-1">
-          Prompted after finishing a lesson's case studies, an AI interview, or a Real World
-          Practice level. Approved reviews are shown publicly alongside testimonials.
+          Prompted after finishing a lesson's case studies, an AI interview, or an Assessment
+          level. Approved reviews are shown publicly alongside testimonials.
         </p>
       </div>
 

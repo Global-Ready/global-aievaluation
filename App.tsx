@@ -77,7 +77,7 @@ import AcceleratorHubView from "./components/AcceleratorHubView";
 import RealWorldPracticeOverview from "./components/RealWorldPracticeOverview";
 import WelcomeView, { type WelcomeSyncStatus } from "./components/WelcomeView";
 import PracticeLevelModal from "./components/PracticeLevelModal";
-import { PRACTICE_DOMAINS, getPracticeDomainLabel, type PracticeDomainId } from "./lib/practice-domains";
+import { getPracticeDomainLabel, type PracticeDomainId } from "./lib/practice-domains";
 
 function applySkillBoosts(
   skills: UserStats["skills"],
@@ -903,46 +903,10 @@ export default function App({
             >
               <span className="flex items-center gap-2">
                 <ListChecks className="w-4 h-4" />
-                Real World Practice
+                Assessment
               </span>
               <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             </button>
-            {PRACTICE_DOMAINS.map((domain) => (
-              <button
-                key={domain.id}
-                id={`tab-btn-practice-domain-${domain.id}`}
-                disabled={domain.comingSoon}
-                onClick={() => {
-                  if (domain.comingSoon) return;
-                  setSelectedPracticeDomain(domain.id);
-                  setActiveTab("practice_overview");
-                  setActiveLessonId(null);
-                  setPracticeModalOpen(true);
-                  setPracticeGroupOpen(false);
-                }}
-                className={`group w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
-                  domain.comingSoon
-                    ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
-                    : "text-slate-600 hover:bg-[#4F46E5] hover:text-white dark:text-slate-400 cursor-pointer"
-                }`}
-              >
-                <span>{domain.label}</span>
-                <span className="flex items-center gap-1 shrink-0">
-                  {domain.comingSoon ? (
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                      Soon
-                    </span>
-                  ) : (
-                    <>
-                      {!isSimulationPracticeAccessible(stats.membershipTier) && (
-                        <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                      )}
-                      <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </>
-                  )}
-                </span>
-              </button>
-            ))}
           </div>
         </div>
       )}
@@ -1010,38 +974,8 @@ export default function App({
                     className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer text-slate-700 hover:bg-[#4F46E5] hover:text-white dark:text-slate-300"
                   >
                     <ListChecks className="w-4 h-4" />
-                    Real World Practice
+                    Assessment
                   </button>
-                  {PRACTICE_DOMAINS.map((domain) => (
-                    <button
-                      key={domain.id}
-                      disabled={domain.comingSoon}
-                      onClick={() => {
-                        if (domain.comingSoon) return;
-                        setSelectedPracticeDomain(domain.id);
-                        setActiveTab("practice_overview");
-                        setActiveLessonId(null);
-                        setPracticeModalOpen(true);
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
-                        domain.comingSoon
-                          ? "text-slate-350 dark:text-slate-600 cursor-not-allowed opacity-60"
-                          : "text-slate-600 hover:bg-[#4F46E5] hover:text-white dark:text-slate-400 cursor-pointer"
-                      }`}
-                    >
-                      <span>{domain.label}</span>
-                      {domain.comingSoon ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
-                          Soon
-                        </span>
-                      ) : (
-                        !isSimulationPracticeAccessible(stats.membershipTier) && (
-                          <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                        )
-                      )}
-                    </button>
-                  ))}
                 </div>
               )}
 
@@ -1770,7 +1704,16 @@ export default function App({
                   );
                 })()}
 
-              {activeTab === "practice_overview" && <RealWorldPracticeOverview />}
+              {activeTab === "practice_overview" && (
+                <RealWorldPracticeOverview
+                  canPractice={isSimulationPracticeAccessible(stats.membershipTier)}
+                  onSelectDomain={(domainId) => {
+                    setSelectedPracticeDomain(domainId);
+                    setActiveLessonId(null);
+                    setPracticeModalOpen(true);
+                  }}
+                />
+              )}
 
               {activeTab === "practice_run" && selectedPracticeDomain && practiceLevel && (
                 <PracticeTaskRunner

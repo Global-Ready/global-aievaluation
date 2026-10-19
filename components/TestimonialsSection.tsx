@@ -8,9 +8,15 @@ import { renderFormattedText } from "./LessonContentRenderer";
 export default function TestimonialsSection({
   testimonials,
   id,
+  heading,
+  subtitle,
+  disclaimer,
 }: {
   testimonials: Testimonial[];
   id?: string;
+  heading?: string;
+  subtitle?: string;
+  disclaimer?: string;
 }) {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -32,10 +38,14 @@ export default function TestimonialsSection({
           <span>Trusted Worldwide</span>
         </div>
         <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-          What Others Have <span className="text-[#4F46E5] dark:text-indigo-400">To Say</span>
+          {heading ?? (
+            <>
+              What Others Have <span className="text-[#4F46E5] dark:text-indigo-400">To Say</span>
+            </>
+          )}
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Real stories from people earning and advancing their alignment skills with Global Ready AIEval.
+          {subtitle ?? "Real stories from people earning and advancing their alignment skills with Global Ready AIEval."}
         </p>
       </div>
 
@@ -148,7 +158,7 @@ export default function TestimonialsSection({
           )}
 
           <p className="text-center text-[10px] text-slate-400 dark:text-slate-550">
-            Testimonials reflect individual experiences. Results vary and are not guaranteed.
+            {disclaimer ?? "Testimonials reflect individual experiences. Results vary and are not guaranteed."}
           </p>
 
           {lightboxOpen && testimonials[activeTestimonial].proofImageUrl && (

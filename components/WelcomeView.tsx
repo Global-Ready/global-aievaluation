@@ -177,7 +177,7 @@ export default function WelcomeView({
           className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-2xl p-4 text-left transition-colors cursor-pointer flex flex-col gap-2"
         >
           <Briefcase className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          <span className="text-xs font-bold text-slate-900 dark:text-white">Real World Practice</span>
+          <span className="text-xs font-bold text-slate-900 dark:text-white">Assessment</span>
         </button>
         <button
           onClick={onGoToInterview}

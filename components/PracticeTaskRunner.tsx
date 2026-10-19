@@ -352,7 +352,7 @@ export default function PracticeTaskRunner({
           onClick={onBack}
           className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer inline-flex items-center gap-2"
         >
-          Back to Real World Practice
+          Back to Assessment
         </button>
       </div>
     );
@@ -364,7 +364,7 @@ export default function PracticeTaskRunner({
         onClick={onBack}
         className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors uppercase tracking-wider cursor-pointer"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to Real World Practice
+        <ArrowLeft className="w-4 h-4" /> Back to Assessment
       </button>
 
       <div className="space-y-1">

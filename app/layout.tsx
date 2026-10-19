@@ -16,13 +16,14 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 const SITE_URL = "https://www.globalreadyaievals.com";
 const SITE_NAME = "Global Ready AIEval";
+const SITE_TITLE = "AI Evaluation Training for Professionals | Global Ready AIEval";
 const SITE_DESCRIPTION =
-  "Learn, practice, qualify, and get hired for real-world AI evaluation, training, RLHF, and prompt engineering jobs with realistic simulations and scoring.";
+  "Build practical AI evaluation skills through interactive lessons, realistic assessments, and career preparation. Start learning with a free introductory module.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Train for Remote AI Evaluation Jobs`,
+    default: SITE_TITLE,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Train for Remote AI Evaluation Jobs`,
+    title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     images: [
       {
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: `${SITE_NAME} — Train for Remote AI Evaluation Jobs`,
+    title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     images: ["/assets/images/logos/global-logo.png"],
   },

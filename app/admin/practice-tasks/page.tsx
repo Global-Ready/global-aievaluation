@@ -29,7 +29,7 @@ export default async function PracticeTasksPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-black text-slate-900 dark:text-white">
-            Real World Practice
+            Assessment
           </h2>
           <p className="text-xs text-slate-450 mt-1">
             Evaluation and annotation tasks — the app groups these by domain,
