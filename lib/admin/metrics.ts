@@ -11,10 +11,10 @@ export interface DateRange {
   preset: string;
 }
 
-// Accepts ?range=24h|7d|30d|1y|custom with &from=YYYY-MM-DD&to=YYYY-MM-DD for custom.
+// Accepts ?range=24h|7d|30d|90d|1y|all|custom with &from=YYYY-MM-DD&to=YYYY-MM-DD for custom.
 export function resolveRange(params: { range?: string; from?: string; to?: string }): DateRange {
   const now = new Date();
-  const presetDays: Record<string, number> = { "24h": 1, "7d": 7, "30d": 30, "1y": 365 };
+  const presetDays: Record<string, number> = { "24h": 1, "7d": 7, "30d": 30, "90d": 90, "1y": 365 };
 
   if (params.range === "custom" && params.from && params.to) {
     const from = new Date(`${params.from}T00:00:00Z`);
@@ -24,11 +24,16 @@ export function resolveRange(params: { range?: string; from?: string; to?: strin
     }
   }
 
+  if (params.range === "all") {
+    return { from: new Date("2000-01-01T00:00:00Z"), to: now, label: "All time", preset: "all" };
+  }
+
   const preset = params.range && presetDays[params.range] ? params.range : "7d";
   const labels: Record<string, string> = {
     "24h": "Last 24 hours",
     "7d": "Last 7 days",
     "30d": "Last 30 days",
+    "90d": "Last 3 months",
     "1y": "Last year",
   };
   return {
@@ -252,4 +257,71 @@ export async function getMetrics(range: DateRange) {
   }));
 
   return { metrics, topSources, deviceRows, countryRows, usersByCountry, affiliateSales };
+}
+
+export interface BlogVisitLogRow {
+  createdAt: string;
+  page: string;
+  country: string;
+  device: string;
+  source: string;
+}
+
+// Admin-only: callers must already be behind the admin layout's auth check.
+export async function getBlogMetrics(range: DateRange) {
+  const service = createServiceClient();
+  const fromIso = range.from.toISOString();
+  const toIso = range.to.toISOString();
+
+  const [visits, postsRes] = await Promise.all([
+    fetchAllRows<{ created_at: string; meta: unknown }>((from, to) =>
+      service
+        .from("analytics_events")
+        .select("created_at, meta")
+        .eq("event", "blog_visit")
+        .gte("created_at", fromIso)
+        .lte("created_at", toIso)
+        .order("created_at", { ascending: false })
+        .range(from, to),
+    ),
+    service.from("blog_posts").select("id, title"),
+  ]);
+
+  const postTitles = new Map((postsRes.data ?? []).map((p) => [p.id as string, p.title as string]));
+  const pageLabelFor = (postId: string | null | undefined) =>
+    postId ? postTitles.get(postId) ?? postId : "Blog (list page)";
+
+  const countries = new Map<string, number>();
+  const devices = new Map<string, number>();
+  const pages = new Map<string, number>();
+
+  for (const v of visits) {
+    const meta = (v.meta ?? {}) as { source?: string; device?: string; country?: string | null; postId?: string | null };
+    countries.set(meta.country ?? "Unknown", (countries.get(meta.country ?? "Unknown") ?? 0) + 1);
+    devices.set(meta.device ?? "unknown", (devices.get(meta.device ?? "unknown") ?? 0) + 1);
+    const page = pageLabelFor(meta.postId);
+    pages.set(page, (pages.get(page) ?? 0) + 1);
+  }
+
+  const toRows = (m: Map<string, number>) =>
+    [...m.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+
+  const recentVisits: BlogVisitLogRow[] = visits.slice(0, 200).map((v) => {
+    const meta = (v.meta ?? {}) as { source?: string; device?: string; country?: string | null; postId?: string | null };
+    return {
+      createdAt: v.created_at,
+      page: pageLabelFor(meta.postId),
+      country: meta.country ?? "Unknown",
+      device: meta.device ?? "unknown",
+      source: meta.source ?? "unknown",
+    };
+  });
+
+  return {
+    totalVisits: visits.length,
+    countryRows: toRows(countries),
+    deviceRows: toRows(devices),
+    pageRows: toRows(pages),
+    recentVisits,
+  };
 }

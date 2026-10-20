@@ -1,3 +1,7 @@
+import { headers } from "next/headers";
+import { createServiceClient } from "@/lib/supabase/service";
+import { createClient } from "@/lib/supabase/server";
+
 export type DeviceType = "mobile" | "tablet" | "desktop";
 
 export function classifyDevice(userAgent: string | null | undefined): DeviceType {
@@ -31,4 +35,34 @@ export function classifySource(
     }
   }
   return "direct";
+}
+
+// Logs a visit to the public blog (list page when postId is null, a
+// specific post otherwise) — these pages are reachable logged-out, so
+// user_id is attributed only when a session happens to be present.
+// Server-only (headers()/service client) — call from a blog page's own
+// server component, not from client code.
+export async function logBlogVisit(postId: string | null): Promise<void> {
+  const requestHeaders = await headers();
+  const device = classifyDevice(requestHeaders.get("user-agent"));
+  const source = classifySource(null, requestHeaders.get("referer"));
+  const country = classifyCountry(requestHeaders.get("x-vercel-ip-country"));
+
+  let userId: string | null = null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    userId = user?.id ?? null;
+  } catch {
+    // Blog pages are public — a missing/invalid session just means anonymous.
+  }
+
+  const service = createServiceClient();
+  await service.from("analytics_events").insert({
+    event: "blog_visit",
+    user_id: userId,
+    meta: { source, device, country, postId },
+  });
 }

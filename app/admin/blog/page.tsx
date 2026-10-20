@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, BarChart3 } from "lucide-react";
 import { getAdminBlogPosts } from "@/lib/admin/queries";
 import DeleteButton from "../DeleteButton";
 import { deleteBlogPost } from "@/lib/actions/admin-blog";
@@ -11,13 +11,22 @@ export default async function AdminBlogPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-black text-slate-900 dark:text-white">Blog</h2>
-        <Link
-          href="/admin/blog/new"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5"
-        >
-          <Plus className="w-4 h-4" />
-          New Post
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/blog/analytics"
+            className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Analytics
+          </Link>
+          <Link
+            href="/admin/blog/new"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" />
+            New Post
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">

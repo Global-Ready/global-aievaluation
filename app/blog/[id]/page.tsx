@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock } from "lucide-react";
 import { getPublishedBlogPost } from "@/lib/content";
+import { logBlogVisit } from "@/lib/analytics";
 import { renderLessonParagraph } from "@/components/LessonContentRenderer";
 
 export async function generateMetadata({
@@ -29,6 +30,8 @@ export default async function BlogPostPage({
   const post = await getPublishedBlogPost(id);
 
   if (!post) notFound();
+
+  await logBlogVisit(post.id);
 
   const paragraphs = post.content.split(/\n{2,}/).filter((p) => p.trim());
 

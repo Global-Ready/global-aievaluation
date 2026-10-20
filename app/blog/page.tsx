@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Newspaper, Clock, ArrowRight } from "lucide-react";
 import { getPublishedBlogPosts } from "@/lib/content";
+import { logBlogVisit } from "@/lib/analytics";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogIndexPage() {
-  const posts = await getPublishedBlogPosts();
+  const [posts] = await Promise.all([getPublishedBlogPosts(), logBlogVisit(null)]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">

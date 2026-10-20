@@ -9,7 +9,7 @@
 // once an admin has tagged practice tasks with it.
 export const PRACTICE_DOMAINS = [
   { id: "generalist", label: "Generalist", comingSoon: false },
-  { id: "coding_engineering", label: "Coding & Engineering", comingSoon: true },
+  { id: "coding_engineering", label: "Coding & Engineering", comingSoon: false },
   { id: "stem", label: "STEM Skills Challenge", comingSoon: true },
   { id: "cybersecurity", label: "Cybersecurity", comingSoon: true },
   { id: "finance_accounting", label: "Finance & Accounting", comingSoon: true },
