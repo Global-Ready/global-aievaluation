@@ -52,6 +52,7 @@ import {
   isSimulationPracticeAccessible,
   TEMP_DISABLE_ALL_PAYMENT_GATES,
 } from "./lib/access";
+import { TIERS } from "./lib/pricing";
 
 // Subcomponents
 import DashboardView from "./components/DashboardView";
@@ -1166,13 +1167,29 @@ export default function App({
           {/* Active Lesson Frame */}
           {activeLessonId !== null ? (
             (() => {
-              // INTERCEPT LOCKED LESSONS FOR FREE TIER
+              // INTERCEPT LOCKED LESSONS FOR FREE TIER — locked status comes
+              // from the real module's own `locked` flag (module index 0 is
+              // always free, see isModuleAccessible), not a hardcoded id
+              // allowlist. That allowlist used to hardcode "l1" as the one
+              // free lesson, back when there was only a single intro
+              // module — it went stale the moment admin-authored modules
+              // with their own id schemes (e.g. "m1_L1") replaced it, which
+              // locked real free-tier lessons out from under free users.
+              const lockedModuleForLesson = activeLessonId.startsWith("p2_")
+                ? undefined
+                : moduleCurriculum.find((m) =>
+                    m.lessons.some((l) => l.id === activeLessonId),
+                  );
+              const isRealModuleLessonLocked = !!lockedModuleForLesson?.locked;
+              const isLegacyPart2Locked =
+                activeLessonId.startsWith("p2_") &&
+                activeLessonId !== "p2_intro" &&
+                activeLessonId !== "p2_m1_l1";
+
               if (
                 !TEMP_DISABLE_ALL_PAYMENT_GATES &&
                 stats.membershipTier === "free" &&
-                activeLessonId !== "l1" &&
-                activeLessonId !== "p2_intro" &&
-                activeLessonId !== "p2_m1_l1"
+                (isRealModuleLessonLocked || isLegacyPart2Locked)
               ) {
                 let lockedLessonTitle = "Advanced Class";
                 let lockedLessonDesc =
@@ -1211,14 +1228,14 @@ export default function App({
                       "Compare multiple outputs objectively, resolve close-tie decisions, and draft calibration-quality justifications.";
                   }
                 } else {
-                  const p1Lesson = moduleCurriculum[0].lessons.find(
+                  const lockedLesson = lockedModuleForLesson?.lessons.find(
                     (l) => l.id === activeLessonId,
                   );
-                  if (p1Lesson) {
-                    lockedLessonTitle = `Part 1, Lesson ${p1Lesson.id.replace("l", "")}: ${p1Lesson.title}`;
+                  if (lockedLesson) {
+                    lockedLessonTitle = lockedLesson.title;
                     lockedLessonDesc =
-                      p1Lesson.description ||
-                      "Master core RLHF and instruction formatting skills with interactive case studies.";
+                      lockedLesson.description ||
+                      "Master core evaluation and annotation skills with interactive case studies.";
                   }
                 }
 
@@ -1242,29 +1259,15 @@ export default function App({
                     <div className="bg-slate-50 dark:bg-slate-850/60 rounded-2xl p-5 border border-slate-100 dark:border-slate-800/80 max-w-xl mx-auto text-left space-y-3.5">
                       <h4 className="text-xs font-bold text-slate-850 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />{" "}
-                        Starter Plan Unlocks (€20, one-time):
+                        {TIERS.professional.label} Plan Unlocks ({TIERS.professional.priceDisplay}):
                       </h4>
                       <ul className="text-xs text-slate-600 dark:text-slate-350 space-y-2">
-                        <li className="flex items-start gap-2">
-                          <span className="text-indigo-500 font-bold">✓</span>
-                          <span>
-                            <strong>Full access to the AI Evaluation Academy</strong>{" "}
-                            — every lesson, with interactive grading
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-indigo-500 font-bold">✓</span>
-                          <span>
-                            <strong>AI Interview Simulator</strong> — 10 sessions
-                            included
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-indigo-500 font-bold">✓</span>
-                          <span>
-                            Unlimited practice exercises &amp; progress tracking
-                          </span>
-                        </li>
+                        {TIERS.professional.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-2">
+                            <span className="text-indigo-500 font-bold">✓</span>
+                            <span>{feature}</span>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                     <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
@@ -1276,7 +1279,7 @@ export default function App({
                         className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
                       >
                         <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300" />
-                        Get Starter (€20 one-time)
+                        Get {TIERS.professional.label} ({TIERS.professional.priceDisplay})
                       </button>
                       <button
                         onClick={handleLessonBack}
