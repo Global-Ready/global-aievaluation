@@ -99,10 +99,10 @@ export default async function AdminMetricsPage({
         </table>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Where visitors came from</h3>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
                 <tr>
@@ -114,9 +114,9 @@ export default async function AdminMetricsPage({
               <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
                 {topSources.map((s) => (
                   <tr key={s.name}>
-                    <td className="px-4 py-2.5 text-slate-900 dark:text-white">{s.name}</td>
-                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">{s.count}</td>
-                    <td className="px-4 py-2.5 text-right text-slate-500">{pct(s.count, visitTotal)}</td>
+                    <td className="px-4 py-2.5 text-slate-900 dark:text-white break-all">{s.name}</td>
+                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white whitespace-nowrap shrink-0">{s.count}</td>
+                    <td className="px-4 py-2.5 text-right text-slate-500 whitespace-nowrap shrink-0">{pct(s.count, visitTotal)}</td>
                   </tr>
                 ))}
                 {topSources.length === 0 && (
@@ -128,35 +128,8 @@ export default async function AdminMetricsPage({
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Mobile vs PC</h3>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
-            <table className="w-full text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
-                <tr>
-                  <th className="text-left px-4 py-3">Device</th>
-                  <th className="text-right px-4 py-3">Visits</th>
-                  <th className="text-right px-4 py-3">Share</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
-                {deviceRows.map((d) => (
-                  <tr key={d.name}>
-                    <td className="px-4 py-2.5 capitalize text-slate-900 dark:text-white">{d.name}</td>
-                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">{d.count}</td>
-                    <td className="px-4 py-2.5 text-right text-slate-500">{pct(d.count, visitTotal)}</td>
-                  </tr>
-                ))}
-                {deviceRows.length === 0 && (
-                  <tr><td colSpan={3} className="px-4 py-6 text-center text-slate-400">No visits in this range.</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="space-y-2">
           <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Where visitors are located</h3>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
                 <tr>
@@ -169,8 +142,8 @@ export default async function AdminMetricsPage({
                 {countryRows.map((c) => (
                   <tr key={c.name}>
                     <td className="px-4 py-2.5 text-slate-900 dark:text-white">{c.name}</td>
-                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">{c.count}</td>
-                    <td className="px-4 py-2.5 text-right text-slate-500">{pct(c.count, visitTotal)}</td>
+                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white whitespace-nowrap shrink-0">{c.count}</td>
+                    <td className="px-4 py-2.5 text-right text-slate-500 whitespace-nowrap shrink-0">{pct(c.count, visitTotal)}</td>
                   </tr>
                 ))}
                 {countryRows.length === 0 && (
@@ -179,6 +152,33 @@ export default async function AdminMetricsPage({
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Mobile vs PC</h3>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto max-w-md">
+          <table className="w-full text-xs">
+            <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
+              <tr>
+                <th className="text-left px-4 py-3">Device</th>
+                <th className="text-right px-4 py-3">Visits</th>
+                <th className="text-right px-4 py-3">Share</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+              {deviceRows.map((d) => (
+                <tr key={d.name}>
+                  <td className="px-4 py-2.5 capitalize text-slate-900 dark:text-white">{d.name}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white whitespace-nowrap shrink-0">{d.count}</td>
+                  <td className="px-4 py-2.5 text-right text-slate-500 whitespace-nowrap shrink-0">{pct(d.count, visitTotal)}</td>
+                </tr>
+              ))}
+              {deviceRows.length === 0 && (
+                <tr><td colSpan={3} className="px-4 py-6 text-center text-slate-400">No visits in this range.</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 

@@ -78,7 +78,7 @@ export default async function BlogAnalyticsPage({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Visits by page</h3>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
                 <tr>
@@ -91,8 +91,8 @@ export default async function BlogAnalyticsPage({
                 {pageRows.map((p) => (
                   <tr key={p.name}>
                     <td className="px-4 py-2.5 text-slate-900 dark:text-white">{p.name}</td>
-                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">{p.count}</td>
-                    <td className="px-4 py-2.5 text-right text-slate-500">{pct(p.count, totalVisits)}</td>
+                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white whitespace-nowrap shrink-0">{p.count}</td>
+                    <td className="px-4 py-2.5 text-right text-slate-500 whitespace-nowrap shrink-0">{pct(p.count, totalVisits)}</td>
                   </tr>
                 ))}
                 {pageRows.length === 0 && (
@@ -105,7 +105,7 @@ export default async function BlogAnalyticsPage({
 
         <div className="space-y-2">
           <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Visits by location</h3>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
                 <tr>
@@ -118,8 +118,8 @@ export default async function BlogAnalyticsPage({
                 {countryRows.map((c) => (
                   <tr key={c.name}>
                     <td className="px-4 py-2.5 text-slate-900 dark:text-white">{c.name}</td>
-                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">{c.count}</td>
-                    <td className="px-4 py-2.5 text-right text-slate-500">{pct(c.count, totalVisits)}</td>
+                    <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white whitespace-nowrap shrink-0">{c.count}</td>
+                    <td className="px-4 py-2.5 text-right text-slate-500 whitespace-nowrap shrink-0">{pct(c.count, totalVisits)}</td>
                   </tr>
                 ))}
                 {countryRows.length === 0 && (
@@ -162,7 +162,7 @@ export default async function BlogAnalyticsPage({
         <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">
           Recent visits {recentVisits.length === 200 && <span className="font-normal normal-case text-slate-400">(last 200)</span>}
         </h3>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">
               <tr>
